@@ -5,42 +5,42 @@
 
 > Hermes Agent is an independent self-hosted project owned by **Ahmed MO Kireldin**. Model names, weights, trademarks, and third-party licenses remain with their respective owners.
 
-## 🎯 هدف هذه الطبقة
+## 🎯 Purpose of this layer
 
-تضيف هذه الطبقة مجموعة نماذج مفتوحة الأوزان قابلة للتشغيل محلياً، مع تسلسل داخلي واضح بين الوكلاء. لا يتم تشغيل كل النماذج في الذاكرة في الوقت نفسه؛ يتم اختيار Profile حسب العتاد والهدف.
+This layer adds a self-hosted open-weight model fleet and a clear internal handoff sequence between agents. The entire fleet does not need to stay in memory at the same time; choose a profile based on hardware, latency, and quality requirements.
 
-## ⚖️ Open Source أم Open Weights؟
+## ⚖️ Open source versus open weights
 
-- **Open source فعلياً:** يمكن أن يكون الترخيص Apache-2.0 أو MIT، مع ضرورة الالتزام بشروطه.
-- **Open weights:** الأوزان متاحة للتنزيل والتشغيل، لكن الترخيص قد يتضمن شروطاً خاصة.
-- **Non-commercial:** بعض النماذج، مثل Aya Expanse حسب بطاقة النموذج، قد تمنع الاستخدام التجاري؛ لذلك لا تستخدمها في خدمة مدفوعة قبل مراجعة الترخيص.
-- وجود النموذج في Ollama أو Hugging Face لا يعني تلقائياً أن كل الاستخدامات مسموحة.
+- **Open source:** A model may use a recognized license such as Apache-2.0 or MIT, but the exact checkpoint terms still apply.
+- **Open weights:** The weights are available to download and run, but the license may include additional conditions.
+- **Non-commercial:** Some models, including certain Aya Expanse checkpoints, may restrict commercial use. Do not use them in a paid service before reviewing the exact model card.
+- Availability on Ollama or Hugging Face does not automatically grant every possible usage right.
 
-## 🧩 Profiles المقترحة
+## 🧩 Recommended profiles
 
-| Profile | مناسب لـ | التشكيلة الأساسية |
+| Profile | Best for | Main lineup |
 |---|---|---|
-| `lite` | جهاز واحد أو ذاكرة محدودة | Qwen3 4B/8B، Qwen Coder 7B، Granite 8B |
-| `balanced` | خادم GPU متوسط | Qwen3 14B، DeepSeek-R1 Distill 14B، Mistral Small 3.1 24B |
-| `quality` | GPU قوي أو عدة خوادم | Qwen3 32B، DeepSeek-R1 Distill 32B، Qwen Coder 32B |
+| `lite` | One machine or limited memory | Qwen3 4B/8B, Qwen Coder 7B, Granite 8B |
+| `balanced` | Medium GPU server | Qwen3 14B, DeepSeek-R1 Distill 14B, Mistral Small 3.1 24B |
+| `quality` | Strong GPU or multiple servers | Qwen3 32B, DeepSeek-R1 Distill 32B, Qwen Coder 32B |
 
-## 🧭 أدوار الوكلاء
+## 🧭 Agent roles
 
-| الدور | النموذج المفضل | البديل | الوظيفة |
+| Role | Preferred model | Alternative | Purpose |
 |---|---|---|---|
-| Router | Qwen3 4B | Gemma 3 صغير | تصنيف الطلب بسرعة |
-| Planner | Qwen3 14B/32B | Mistral Small 3.1 | بناء الخطة وتنسيق الوكلاء |
-| Reasoner | DeepSeek-R1 Distill 14B/32B | Qwen3 Thinking | الحساب والمنطق والاستدلال |
-| Coder | Qwen2.5-Coder 7B/14B/32B | Qwen3 | كتابة واختبار الكود |
-| Arabic | Qwen3 8B/14B | Aya Expanse 8B* | العربية والرسائل |
-| Vision | Mistral Small 3.1 24B | Gemma multimodal | الصور والوثائق |
-| Tools | Granite 3.3 8B | Qwen3 | استدعاء الأدوات بصيغة منظمة |
-| Critic | Mistral Small 3.1 24B | Granite 3.3 | تقييم مستقل متعدد الأبعاد |
-| Embeddings | BGE-M3 | EmbeddingGemma | استرجاع المهارات بالعربية |
+| Router | Qwen3 4B | Small Gemma | Fast request classification |
+| Planner | Qwen3 14B/32B | Mistral Small 3.1 | Planning and agent coordination |
+| Reasoner | DeepSeek-R1 Distill 14B/32B | Qwen3 Thinking | Math, logic, and deep reasoning |
+| Coder | Qwen2.5-Coder 7B/14B/32B | Qwen3 | Code generation, testing, and debugging |
+| Arabic | Qwen3 8B/14B | Aya Expanse 8B* | Arabic and customer messaging |
+| Vision | Mistral Small 3.1 24B | Multimodal Gemma | Images and documents |
+| Tools | Granite 3.3 8B | Qwen3 | Structured tool invocation |
+| Critic | Mistral Small 3.1 24B | Granite 3.3 | Independent multidimensional evaluation |
+| Embeddings | BGE-M3 | EmbeddingGemma | Arabic and multilingual skill retrieval |
 
-`*` Aya Expanse اختيار غير تجاري/مشروط حسب الترخيص الدقيق لنسخة النموذج.
+`*` Aya Expanse is a conditional/non-commercial option depending on the exact checkpoint license.
 
-## 🔁 تسلسل الوكلاء الداخلي
+## 🔁 Internal agent sequence
 
 ```mermaid
 flowchart LR
@@ -65,9 +65,9 @@ flowchart LR
   STORE --> EVOLVER[🔄 Evolver: tests before promotion]
 ```
 
-## 🔄 Agent handoff contract
+## 🔁 Agent handoff contract
 
-كل وكيل يستلم JSON موحداً:
+Every agent receives a normalized JSON envelope:
 
 ```json
 {
@@ -82,7 +82,7 @@ flowchart LR
 }
 ```
 
-ويرجع:
+It returns:
 
 ```json
 {
@@ -96,35 +96,35 @@ flowchart LR
 }
 ```
 
-النموذج لا يملك صلاحية منح نفسه أدوات جديدة. طبقة Policy هي التي تقرر ما إذا كان Tool Call مسموحاً.
+The model cannot grant itself new tools. The policy layer decides whether a tool call is allowed.
 
-## 🧬 التطوير الذاتي الآمن
+## 🧬 Safe self-improvement
 
-1. اجمع المهام منخفضة الجودة.
-2. استخرج أسباب الفشل.
-3. اقترح Prompt أو Skill candidate.
-4. اختبر على `dev`.
-5. اختبر على `holdout` مخفي.
-6. نفّذ Canary محدوداً.
-7. روّج الإصدار أو نفّذ Rollback.
+1. Collect low-quality tasks.
+2. Extract failure causes.
+3. Propose a prompt or skill candidate.
+4. Test against the `dev` set.
+5. Test against a hidden `holdout` set.
+6. Run a limited canary rollout.
+7. Promote the version or roll it back.
 
-لا يتم تعديل أوزان النماذج أو كود النظام تلقائياً. Fine-tuning وLoRA إجراءات منفصلة تحتاج مراجعة بشرية.
+Model weights and core system code are never modified automatically. Fine-tuning and LoRA are separate procedures that require human review.
 
-## 📦 التشغيل
+## 📦 Running the fleet
 
 ```bash
-# اختَر profile ثم اسحب النماذج
+# Select a profile and pull the models
 PROFILE=lite ./scripts-pull-models.sh
 
-# راجع الإعدادات
+# Review the configuration
 cat config/models.open.yaml
 
-# شغل النظام
+# Start the system
 cp .env.example .env
 docker compose up --build
 ```
 
-## 🔗 مصادر رسمية
+## 🔗 Official sources
 
 - [Qwen3 official release](https://qwenlm.github.io/blog/qwen3/)
 - [DeepSeek-R1 official release](https://api-docs.deepseek.com/news/news250120)
@@ -135,10 +135,9 @@ docker compose up --build
 - [Aya Expanse model card](https://huggingface.co/CohereForAI/aya-expanse-8b)
 - [BGE-M3 model card](https://huggingface.co/BAAI/bge-m3)
 
-## © الملكية
+## © Ownership
 
 © 2026 Ahmed MO Kireldin. Hermes Agent project documentation and integration code are attributed to the project owner above. Third-party models and libraries are governed by their own licenses.
-
 
 ## 📞 Official owner contact
 

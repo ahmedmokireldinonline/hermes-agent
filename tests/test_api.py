@@ -20,7 +20,7 @@ async def test_health():
 async def test_create_and_get_task():
     await init_db()
     async with AsyncClient(transport=ASGITransport(app=app), base_url='http://test') as client:
-        created = await client.post('/tasks', json={'input': 'Write a short Arabic follow-up message'})
+        created = await client.post('/tasks', json={'input': 'Write a short English follow-up message'})
         assert created.status_code == 202
         task = created.json()
         assert task['status'] == 'succeeded'

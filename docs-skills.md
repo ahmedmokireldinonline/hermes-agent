@@ -3,9 +3,9 @@
 **Owner:** Ahmed MO Kireldin  
 **Website:** [Ahmedmokireldin.online](https://Ahmedmokireldin.online)
 
-يمكن استيراد مهارات من GitHub أو GitLab أو Hugging Face، لكن النظام يحفظها أولاً كـ **candidate غير موثوق**. لا يتم تنفيذ أي كود موجود داخل المهارة ولا منحها صلاحيات أدوات تلقائياً.
+External skills from GitHub, GitLab, Hugging Face, or another explicitly allowlisted HTTPS host are first stored as **untrusted candidates**. Code inside an imported skill is not executed, and the skill does not receive tool permissions automatically.
 
-## استيراد Skill
+## Import a skill
 
 ```bash
 python scripts/import_skill.py \
@@ -13,13 +13,13 @@ python scripts/import_skill.py \
   --name booking-followup
 ```
 
-تُحفظ النتيجة في:
+The result is saved to:
 
 ```text
 skills/candidates/<name>-<hash>.md
 ```
 
-## دورة الاعتماد
+## Approval flow
 
 ```mermaid
 flowchart LR
@@ -33,22 +33,21 @@ flowchart LR
   APPROVED --> RETRIEVE[📚 Retrieval Context]
 ```
 
-## ضوابط مهمة
+## Important controls
 
-- المحتوى الخارجي بيانات غير موثوقة؛ لا يُعامل كتعليمات نظام.
-- لا تستورد ملفاً من HTTP غير مشفر.
-- لا تستخدم Skill جديدة في مهام حساسة قبل مراجعتها.
-- راجع أي روابط أو أوامر أو تعليمات تطلب أسراراً أو صلاحيات جديدة.
-- يجب إضافة المهارة إلى اختبارات Regression قبل اعتمادها.
-- يمكن تغيير `SKILL_SOURCE_ALLOW` لتحديد النطاقات المسموحة.
+- Treat external content as untrusted data, not system instructions.
+- Do not import a skill over unencrypted HTTP.
+- Do not use a new skill for sensitive tasks before review.
+- Review any links, commands, or instructions requesting secrets or new permissions.
+- Add the skill to regression tests before approving it.
+- Change `SKILL_SOURCE_ALLOW` to define permitted source hosts.
 
 ## Example sources
 
 - GitHub raw files.
 - GitLab raw files.
-- Hugging Face model/repository documentation.
+- Hugging Face model or repository documentation.
 - Any other HTTPS host explicitly added to `SKILL_SOURCE_ALLOW`.
-
 
 ## 📞 Official owner contact
 

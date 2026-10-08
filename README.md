@@ -11,24 +11,25 @@
 
 These contact details identify the project owner and are included at the owner's request.
 
-نسخة MVP قابلة للتشغيل من منصة Hermes Agent متعددة الوكلاء. تنفذ المسار الأساسي: استقبال المهمة، التوجيه، تنفيذ النموذج، التقييم، والحفظ. تدعم التشغيل المحلي في وضع Mock وتشغيل Redis/Postgres عبر Docker Compose، كما تتضمن Profiles لنماذج مفتوحة الأوزان قابلة للتشغيل محلياً.
+Hermes Agent is a self-hosted multi-agent AI platform. It routes each task to a specialist, provides controlled tools and reusable skills, evaluates outputs with a critic, and prepares safe self-improvement workflows. It supports local Mock execution, Ollama model serving, Redis/Postgres through Docker Compose, and open-weight model profiles.
 
-> Hermes Agent is an independent self-hosted project owned by **Ahmed MO Kireldin**. Third-party model weights, names, trademarks, and licenses remain with their respective owners.
+> Hermes Agent is an independent project owned by **Ahmed MO Kireldin**. Third-party model weights, names, trademarks, and licenses remain with their respective owners.
 
-> هذه النسخة MVP وليست جاهزة لتعريضها للإنترنت دون reverse proxy وTLS وrate limiting وSSRF hardening وsandbox أقوى.
+> This MVP must not be exposed directly to the public internet without a reverse proxy, TLS, authentication, rate limiting, SSRF hardening, and stronger sandbox isolation.
 
-## المكونات
+## Components
 
 - FastAPI: `POST /tasks`, `GET /tasks/{id}`, `GET /health`
-- SQLAlchemy async: SQLite محلياً أو PostgreSQL عبر Docker
-- Redis queue: اختياري محلياً، ومفعّل في Compose
-- Router / Executor / Critic: Mock افتراضياً أو Ollama
-- أدوات مقيدة: workspace files، Python timeout، HTTP public-only، webhook allowlist
-- Worker مستقل عند `QUEUE_MODE=redis`
-- Profiles للنماذج: `lite`, `balanced`, `quality`
-- تسلسل وكلاء داخلي موثق مع عقود handoff وقيود صلاحيات
+- Async SQLAlchemy: SQLite locally or PostgreSQL through Docker
+- Redis queue: optional locally and enabled in Compose
+- Router / Executor / Critic: Mock by default or Ollama-backed
+- Restricted tools: workspace files, Python timeout, public-only HTTP, webhook allowlist
+- Independent Worker when `QUEUE_MODE=redis`
+- Model profiles: `lite`, `balanced`, and `quality`
+- Documented internal agent handoff contracts and permission boundaries
+- External skill importer for GitHub, GitLab, Hugging Face, and explicitly allowlisted HTTPS sources
 
-## تشغيل سريع محلياً
+## Quick local start
 
 ```bash
 cd hermes-agent
@@ -39,25 +40,25 @@ cp .env.example .env
 uvicorn app.api:app --reload --port 8000
 ```
 
-في الوضع المحلي الافتراضي تكون المهام Inline و`MOCK_LLM=true`، لذلك لا تحتاج إلى Ollama أو Redis.
+The default local mode executes tasks inline with `MOCK_LLM=true`, so Ollama and Redis are not required.
 
 ```bash
 curl http://localhost:8000/health
 curl -X POST http://localhost:8000/tasks \
   -H 'Content-Type: application/json' \
-  -d '{"input":"احسب نسبة الإشغال لـ 18 ليلة من أصل 30"}'
+  -d '{"input":"Calculate the occupancy rate for 18 booked nights out of 30"}'
 ```
 
-إذا عيّنت `API_KEYS`، أرسل `X-API-Key` مع الطلبات.
+If `API_KEYS` is configured, send `X-API-Key` with requests.
 
-## التشغيل عبر Docker Compose
+## Docker Compose
 
 ```bash
 cp .env.example .env
 docker compose up --build
 ```
 
-ثم أرسل المهمة:
+Submit a task:
 
 ```bash
 curl -X POST http://localhost:8000/tasks \
@@ -65,38 +66,38 @@ curl -X POST http://localhost:8000/tasks \
   -d '{"input":"Draft a customer update about this week\'s bookings", "idempotency_key":"booking-001"}'
 ```
 
-يعيد API مهمة بحالة `queued`. نفّذ `GET /tasks/{id}` حتى تصبح `succeeded`.
+The API returns a task with `queued` status. Poll `GET /tasks/{id}` until it becomes `succeeded`.
 
-## 🧠 Open Model Fleet
+## 🧠 Open model fleet
 
-يوجد ملف `config/models.open.yaml` بتشكيلات مبدئية:
+The `config/models.open.yaml` file defines the initial profiles:
 
-| Profile | الاستخدام | النماذج الرئيسية |
+| Profile | Intended use | Main models |
 |---|---|---|
-| `lite` | جهاز واحد أو ذاكرة محدودة | Qwen3 4B/8B، Qwen Coder 7B، Granite 8B |
-| `balanced` | خادم GPU متوسط | Qwen3 14B، DeepSeek-R1 Distill 14B، Mistral Small 3.1 24B |
-| `quality` | GPU قوي أو عدة خوادم | Qwen3 32B، DeepSeek-R1 Distill 32B، Qwen Coder 32B |
+| `lite` | One machine or limited memory | Qwen3 4B/8B, Qwen Coder 7B, Granite 8B |
+| `balanced` | Medium GPU server | Qwen3 14B, DeepSeek-R1 Distill 14B, Mistral Small 3.1 24B |
+| `quality` | Strong GPU or multiple servers | Qwen3 32B, DeepSeek-R1 Distill 32B, Qwen Coder 32B |
 
-اسحب النماذج المحددة عبر Ollama:
+Pull the selected models through Ollama:
 
 ```bash
 PROFILE=lite ./scripts-pull-models.sh
 ```
 
-راجع التراخيص قبل الاستخدام التجاري أو إعادة التوزيع؛ Open Weights لا تعني دائماً OSI Open Source. التوثيق الكامل موجود في [docs-open-models.md](docs-open-models.md)، مع [OWNER.md](OWNER.md) و[THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Review licenses before commercial use or redistribution. Open weights do not automatically mean OSI-approved open source. See [docs-open-models.md](docs-open-models.md), [OWNER.md](OWNER.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-### التسلسل الداخلي المقترح
+### Recommended internal chain
 
 `👤 User → 🔐 API → ⚡ Router → 🧭 Planner → 📚 Skills → 🧩 Specialist → 🛠️ Tools → 🔎 Critic → 🗄️ Trace → 🔄 Evolver`
 
-## تشغيل Ollama
+## Ollama
 
-1. شغّل Ollama خارج Compose أو أضف خدمة Ollama إلى بيئتك.
-2. اسحب Profile مناسباً عبر `scripts-pull-models.sh`.
-3. اضبط `MOCK_LLM=false` و`OLLAMA_URL`.
-4. راجع `config/models.open.yaml` قبل التشغيل.
+1. Run Ollama outside Compose or add an Ollama service to your environment.
+2. Pull a profile with `scripts-pull-models.sh`.
+3. Set `MOCK_LLM=false` and `OLLAMA_URL`.
+4. Review `config/models.open.yaml` before starting production workloads.
 
-## هيكل المشروع
+## Project structure
 
 ```text
 app/
@@ -106,20 +107,23 @@ app/
   llm.py       Mock/Ollama gateway with model profiles
   queue.py     Redis queue adapter
   worker.py    queue worker
+  skills.py    external skill importer
   tools.py     constrained tools
   evolver.py   conservative self-improvement entry point
 config/        model roles and open-weight profiles
 prompts/       role guidance
 tests/         automated and regression tests
 workspace/     confined file workspace
+skills/        imported candidate skills
 docs-open-models.md  model fleet and agent handoff
+docs-skills.md       external skills and approval flow
 docs-architecture.md architecture diagrams
 docs/index.html      responsive project landing page with inline icons
 ```
 
-## 🧰 External Skills من GitHub والمنصات الأخرى
+## 🧰 External skills from GitHub and other platforms
 
-يمكن استيراد Skill خارجية كمرشح غير موثوق من GitHub أو GitLab أو Hugging Face:
+Import an external skill as an untrusted candidate:
 
 ```bash
 python scripts/import_skill.py \
@@ -127,18 +131,18 @@ python scripts/import_skill.py \
   --name booking-followup
 ```
 
-تُحفظ المهارة في `skills/candidates/` بعد فحص HTTPS وAllowlist وحساب Content Hash. لا تُعتمد ولا تُمنح صلاحيات أدوات تلقائياً؛ راجع [docs-skills.md](docs-skills.md).
+The skill is saved under `skills/candidates/` after HTTPS validation, host allowlisting, and content hashing. It is not approved and does not receive tool permissions automatically. Read [docs-skills.md](docs-skills.md).
 
-## حالة MVP وما لم يُنفذ بعد
+## MVP scope and planned work
 
-النسخة الحالية توفر المسار الأساسي، لكنها لا تتضمن بعد: pgvector retrieval حقيقياً، reranker، audio/vision services، Evolver كامل، migrations Alembic، distributed leases، full rate limiting، human approval UI، metrics export، أو Firecracker isolation. أضف هذه المكونات بعد تثبيت الاستخدام وكتابة اختبارات التكامل.
+The current version provides the core path but does not yet include real pgvector retrieval, a reranker service, audio/vision service integration, full Evolver promotion, Alembic migrations, distributed leases, full rate limiting, a human approval UI, metrics export, or Firecracker isolation. Add these components after validating usage and expanding integration tests.
 
-## معايير الأمان
+## Security requirements
 
-- لا تضع الأسرار داخل prompts أو traces.
-- لا تفتح API للعامة مباشرة.
-- ضع reverse proxy وTLS وrate limiting.
-- أبقِ `WEBHOOK_ALLOW` فارغاً حتى تضيف endpoints مقصودة.
-- اعتبر كل محتوى HTTP بيانات غير موثوقة.
-- استخدم sandbox أقوى من subprocess لتشغيل كود غير موثوق.
-- راجع الترخيص الدقيق لكل نموذج قبل الاستخدام التجاري.
+- Never place secrets in prompts or traces.
+- Never expose the API directly to the public internet.
+- Use a reverse proxy, TLS, authentication, and rate limiting.
+- Keep `WEBHOOK_ALLOW` empty until intended endpoints are explicitly reviewed.
+- Treat all HTTP content as untrusted data.
+- Use a stronger sandbox than a subprocess for untrusted code.
+- Review the exact license of every model before commercial use.

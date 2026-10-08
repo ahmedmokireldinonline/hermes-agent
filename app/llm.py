@@ -32,7 +32,7 @@ class LLMClient:
     def _mock(self, role: str, prompt: str) -> str:
         if role == 'fast':
             text = prompt.lower()
-            selected = 'coder' if any(x in text for x in ['code', 'python', 'برمج', 'كود']) else ('arabic' if any(x in text for x in ['arabic', 'عربي', 'رسالة']) else 'planner')
+            selected = 'coder' if any(x in text for x in ['code', 'python', 'program', 'debug']) else ('arabic' if any(x in text for x in ['arabic', 'egyptian', 'customer message']) else 'planner')
             return json.dumps({'role': selected, 'confidence': 0.8})
         if role == 'critic':
             return json.dumps({'accuracy': 8, 'completeness': 8, 'language_quality': 8, 'instruction_following': 8, 'safety': 9, 'overall': 8.2, 'critique': 'Mock evaluation; replace with a real critic model.', 'reusable': False})
