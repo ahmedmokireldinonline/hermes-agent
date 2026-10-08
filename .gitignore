@@ -4,5 +4,14 @@ __pycache__/
 *.pyc
 *.db
 .pytest_cache/
+.coverage
+htmlcov/
 workspace/*
 !workspace/.gitkeep
+review/*
+!review/.gitkeep
+skills/candidates/*
+!skills/candidates/.gitkeep
+skills/approved/*
+!skills/approved/.gitkeep
+skills/audit.log
