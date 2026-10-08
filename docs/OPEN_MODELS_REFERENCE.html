@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>مرجع النماذج المفتوحة - Hermes Agent</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;600;700&display=swap">
+<style>
+:root{
+  --bg:#f6f7f9;
+  --surface:#fff;
+  --ink:#16202c;
+  --muted:#5b6776;
+  --line:#dfe3e8;
+  --p:#1f8a4c;
+  --pbg:#e3f3ea;
+  --c:#a86a00;
+  --cbg:#fbf0d9;
+  --n:#b3372b;
+  --nbg:#f9e1de;
+  --accent:#1f3864;
+  --info:#0066cc;
+  --infobg:#e6f2ff;
+}
+
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1419;
+    --surface:#171e26;
+    --ink:#e8edf2;
+    --muted:#9aa7b5;
+    --line:#2a343f;
+    --p:#4cc58a;
+    --pbg:#14301f;
+    --c:#e6a93b;
+    --cbg:#3a2c0e;
+    --n:#ef7b6e;
+    --nbg:#3b1a17;
+    --accent:#8fb0ee;
+    --info:#5ba3ff;
+    --infobg:#1a3a66;
+  }
+}
+
+:root[data-theme="dark"]{
+  --bg:#0f1419;
+  --surface:#171e26;
+  --ink:#e8edf2;
+  --muted:#9aa7b5;
+  --line:#2a343f;
+  --p:#4cc58a;
+  --pbg:#14301f;
+  --c:#e6a93b;
+  --cbg:#3a2c0e;
+  --n:#ef7b6e;
+  --nbg:#3b1a17;
+  --accent:#8fb0ee;
+  --info:#5ba3ff;
+  --infobg:#1a3a66;
+}
+
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+
+*{box-sizing:border-box}
+
+body{
+  margin:0;
+  background:var(--bg);
+  color:var(--ink);
+  font-family:"IBM Plex Sans Arabic",Tahoma,Arial,sans-serif;
+  line-height:1.6
+}
+
+header{
+  padding:24px 16px 8px;
+  max-width:1000px;
+  margin:0 auto;
+  background:linear-gradient(135deg, var(--accent) 0%, var(--info) 100%);
+  color:#fff;
+  border-radius:0 0 16px 16px;
+}
+
+h1{
+  font-size:1.6rem;
+  margin:0 0 8px;
+  font-weight:700;
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+h1::before{content:"🤖"}
+
+.sub{
+  margin:0;
+  opacity:0.9;
+  font-size:.95rem;
+  line-height:1.5;
+}
+
+.hero{
+  max-width:1000px;
+  margin:20px auto;
+  padding:20px;
+  background:var(--infobg);
+  border:1px solid var(--info);
+  border-radius:12px;
+  color:var(--info);
+}
+
+.bar{
+  position:sticky;
+  top:env(safe-area-inset-top,0px);
+  z-index:5;
+  background:var(--bg);
+  padding:10px 16px 8px;
+  max-width:1000px;
+  margin:0 auto;
+  border-bottom:1px solid var(--line);
+}
+
+input[type=search]{
+  width:100%;
+  padding:11px 14px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--ink);
+  font:inherit;
+  font-size:1rem;
+}
+
+input[type=search]:focus-visible,button:focus-visible{
+  outline:2px solid var(--accent);
+  outline-offset:2px;
+}
+
+.chips{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  overflow-x:auto;
+  padding-bottom:4px;
+}
+
+button.chip{
+  flex:none;
+  border:1px solid var(--line);
+  background:var(--surface);
+  color:var(--ink);
+  padding:7px 12px;
+  border-radius:999px;
+  font:inherit;
+  font-size:.85rem;
+  cursor:pointer;
+  transition:all 0.2s;
+}
+
+button.chip:hover{
+  border-color:var(--accent);
+}
+
+button.chip[aria-pressed=true]{
+  background:var(--accent);
+  color:#fff;
+  border-color:var(--accent);
+  font-weight:600;
+}
+
+.count{
+  color:var(--muted);
+  font-size:.82rem;
+  margin:8px 2px 0;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+.count::before{content:"📊"}
+
+main{
+  max-width:1000px;
+  margin:0 auto;
+  padding:4px 16px 40px;
+}
+
+.group{
+  margin:20px 0 8px;
+  font-size:1.05rem;
+  font-weight:700;
+  color:var(--accent);
+  display:flex;
+  align-items:center;
+  gap:8px;
+}
+
+.group-icon{font-size:1.3rem}
+
+ul{
+  list-style:none;
+  margin:0;
+  padding:0;
+  background:var(--surface);
+  border:1px solid var(--line);
+  border-radius:12px;
+  overflow:hidden;
+  box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+li{
+  padding:14px;
+  border-top:1px solid var(--line);
+  border-inline-start:5px solid var(--bar);
+  transition:background 0.2s;
+}
+
+li:hover{background:rgba(31,56,100,0.02)}
+
+li:first-child{border-top:0}
+
+li.p{--bar:var(--p)}
+li.c{--bar:var(--c)}
+li.n{--bar:var(--n)}
+
+.top{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:baseline;
+  flex-wrap:wrap;
+}
+
+.name{
+  font-weight:600;
+  font-size:1.05rem;
+  direction:ltr;
+  unicode-bidi:isolate;
+  color:var(--ink);
+}
+
+.dev{
+  color:var(--muted);
+  font-size:.85rem;
+  direction:ltr;
+  unicode-bidi:isolate;
+  background:var(--pbg);
+  padding:2px 8px;
+  border-radius:4px;
+  white-space:nowrap;
+}
+
+.lic{
+  margin-top:6px;
+  font-size:.9rem;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+.tag{
+  display:inline-block;
+  padding:2px 10px;
+  border-radius:6px;
+  font-size:.8rem;
+  font-weight:600;
+  white-space:nowrap;
+}
+
+.p .tag{background:var(--pbg);color:var(--p)}
+.c .tag{background:var(--cbg);color:var(--c)}
+.n .tag{background:var(--nbg);color:var(--n)}
+
+.license-text{
+  direction:ltr;
+  unicode-bidi:isolate;
+  font-family:"Courier New",monospace;
+  font-size:.9rem;
+}
+
+.note{
+  margin-top:6px;
+  color:var(--muted);
+  font-size:.85rem;
+  padding-inline-start:8px;
+  border-inline-start:2px solid var(--line);
+  padding-inline-start:12px;
+}
+
+.specs{
+  margin-top:8px;
+  display:flex;
+  gap:12px;
+  flex-wrap:wrap;
+  font-size:.85rem;
+}
+
+.spec{
+  display:flex;
+  align-items:center;
+  gap:4px;
+  padding:4px 8px;
+  background:var(--pbg);
+  border-radius:4px;
+  color:var(--p);
+}
+
+.empty{
+  padding:40px;
+  text-align:center;
+  color:var(--muted);
+}
+
+.empty::before{
+  content:"🔍";
+  display:block;
+  font-size:3rem;
+  margin-bottom:16px;
+  opacity:0.5;
+}
+
+footer{
+  max-width:1000px;
+  margin:0 auto;
+  padding:0 16px 32px;
+  color:var(--muted);
+  font-size:.8rem;
+  line-height:1.6;
+}
+
+.legend{
+  max-width:1000px;
+  margin:20px auto;
+  padding:20px;
+  background:var(--surface);
+  border-radius:12px;
+  border:1px solid var(--line);
+}
+
+.legend h3{
+  margin:0 0 12px;
+  font-size:1rem;
+  color:var(--accent);
+}
+
+.legend-items{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(250px, 1fr));
+  gap:12px;
+}
+
+.legend-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.legend-color{
+  width:20px;
+  height:20px;
+  border-radius:4px;
+}
+
+.legend-color.p{background:var(--pbg);border:2px solid var(--p)}
+.legend-color.c{background:var(--cbg);border:2px solid var(--c)}
+.legend-color.n{background:var(--nbg);border:2px solid var(--n)}
+
+.stats{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(150px, 1fr));
+  gap:12px;
+  margin-top:12px;
+}
+
+.stat-card{
+  background:var(--pbg);
+  padding:12px;
+  border-radius:8px;
+  text-align:center;
+  border:1px solid var(--p);
+}
+
+.stat-card.c{background:var(--cbg);border-color:var(--c);color:var(--c)}
+.stat-card.n{background:var(--nbg);border-color:var(--n);color:var(--n)}
+
+.stat-card strong{
+  display:block;
+  font-size:1.4rem;
+  margin:4px 0;
+}
+
+.stat-card small{
+  display:block;
+  font-size:.8rem;
+}
+
+.theme-toggle{
+  position:fixed;
+  bottom:20px;
+  left:20px;
+  width:50px;
+  height:50px;
+  border-radius:50%;
+  background:var(--accent);
+  border:none;
+  color:#fff;
+  cursor:pointer;
+  font-size:1.5rem;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  z-index:100;
+}
+
+.theme-toggle:hover{
+  transform:scale(1.1);
+}
+
+@media (max-width:600px){
+  h1{font-size:1.3rem}
+  .top{flex-direction:column}
+  .legend-items{grid-template-columns:1fr}
+  .theme-toggle{width:45px;height:45px;font-size:1.3rem}
+}
+</style>
+</head>
+<body>
+
+<header>
+<h1>مرجع النماذج المفتوحة</h1>
+<p class="sub">قائمة شاملة بـ 150+ نموذج مفتوح المصدر يمكن استخدامها في Hermes Agent مع تفاصيل الترخيص والقيود.</p>
+</header>
+
+<div class="hero">
+<strong>💡 نصيحة:</strong> استخدم حقل البحث أسفله للعثور على نموذج معين حسب الاسم أو الجهة أو نوع الترخيص. يمكنك أيضاً تصفية النتائج حسب إمكانية الاستخدام التجاري.
+</div>
+
+<div class="bar">
+<input id="q" type="search" placeholder="ابحث: Qwen، Llama، DeepSeek، MIT، Apache..." aria-label="بحث النماذج">
+<div class="chips" id="chips"></div>
+<div class="count" id="count" aria-live="polite"></div>
+</div>
+
+<main id="list"></main>
+
+<div class="legend">
+<h3>🎯 توضيح الترخيص</h3>
+<div class="legend-items">
+<div class="legend-item">
+  <div class="legend-color p"></div>
+  <div>
+    <strong style="color:var(--p)">تجاري بدون قيود</strong><br>
+    <small>Apache 2.0, MIT, وغيرها</small>
+  </div>
+</div>
+<div class="legend-item">
+  <div class="legend-color c"></div>
+  <div>
+    <strong style="color:var(--c)">تجاري بشروط</strong><br>
+    <small>حدود MAU، ذكر النسب، وغيرها</small>
+  </div>
+</div>
+<div class="legend-item">
+  <div class="legend-color n"></div>
+  <div>
+    <strong style="color:var(--n)">غير تجاري</strong><br>
+    <small>CC-BY-NC 4.0 وترخيصات مشابهة</small>
+  </div>
+</div>
+</div>
+
+<div class="stats" id="stats"></div>
+</div>
+
+<footer>
+<p>
+<strong>⚠️ تنبيه قانوني:</strong> هذه المعلومات صحيحة وفقاً لحالة النماذج في وقت إعداد هذا المرجع وقد تتغير مع الإصدارات الجديدة. 
+هذه ليست استشارة قانونية، فيرجى التحقق من صفحة النموذج على Hugging Face والتراخيص الرسمية قبل الاستخدام النهائي.
+النماذج المشتقة ترث شروط ترخيص النموذج الأساسي.
+</p>
+<p>
+<strong>🔗 المراجع:</strong>
+<a href="https://huggingface.co/" target="_blank">Hugging Face</a> •
+<a href="https://github.com/ahmedmokireldinonline/hermes-agent" target="_blank">Hermes Agent</a> •
+<a href="https://github.com/ahmedmokireldinonline/hermes-agent/blob/main/docs/INFRASTRUCTURE.md" target="_blank">دليل البنية التحتية</a>
+</p>
+<p>آخر تحديث: 2026-10-08 | الإصدار: 1.0</p>
+</footer>
+
+<button class="theme-toggle" id="theme-toggle" title="تبديل المظهر">🌙</button>
+
+<script>
+const DATA=[
+["Qwen3-235B-A22B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "235B"],
+["Qwen3-32B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "32B"],
+["Qwen3-14B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "14B"],
+["Qwen3-8B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "8B"],
+["Qwen3-4B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "4B"],
+["Qwen3-Coder-30B-A3B", "Alibaba (Qwen)", "Apache 2.0", "p", "متخصص: البرمجة", "30B"],
+["Qwen2.5-72B-Instruct", "Alibaba (Qwen)", "Qwen License", "c", "حد 100 مليون مستخدم شهري", "72B"],
+["Qwen2.5-32B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "32B"],
+["QwQ-32B", "Alibaba (Qwen)", "Apache 2.0", "p", "", "32B"],
+["DeepSeek-V3", "DeepSeek", "DeepSeek Model License", "c", "استخدام تجاري مسموح مع قيود", ""],
+["DeepSeek-V3.1", "DeepSeek", "MIT", "p", "", ""],
+["DeepSeek-R1", "DeepSeek", "MIT", "p", "", ""],
+["R1-Distill-Llama-70B", "DeepSeek", "MIT + Llama Community License", "c", "مبني على Llama", "70B"],
+["DeepSeek-Coder-V2", "DeepSeek", "DeepSeek Model License", "c", "متخصص: البرمجة", ""],
+["DeepSeek-OCR", "DeepSeek", "MIT", "p", "متخصص: استخراج النص", ""],
+["Kimi K2", "Moonshot AI", "Modified MIT", "c", "حد 100 مليون MAU", ""],
+["Kimi-Dev-72B", "Moonshot AI", "MIT", "p", "", "72B"],
+["GLM-4.5", "Zhipu AI", "MIT", "p", "", ""],
+["GLM-4-32B", "Zhipu AI", "MIT", "p", "", "32B"],
+["MiniMax-M1", "MiniMax", "Apache 2.0", "p", "", ""],
+["MiniMax-M2", "MiniMax", "MIT", "p", "", ""],
+["Mistral Large 3", "Mistral AI", "Apache 2.0", "p", "", ""],
+["Ministral 3 14B", "Mistral AI", "Apache 2.0", "p", "", "14B"],
+["Ministral 3 8B", "Mistral AI", "Apache 2.0", "p", "", "8B"],
+["Mistral Nemo 12B", "Mistral AI", "Apache 2.0", "p", "", "12B"],
+["Mixtral 8x22B", "Mistral AI", "Apache 2.0", "p", "نموذج مرن (MoE)", "176B"],
+["Mixtral 8x7B", "Mistral AI", "Apache 2.0", "p", "نموذج مرن (MoE)", "56B"],
+["Mistral 7B", "Mistral AI", "Apache 2.0", "p", "", "7B"],
+["Pixtral 12B", "Mistral AI", "Apache 2.0", "p", "متخصص: الرؤية", "12B"],
+["Llama 4 Maverick", "Meta", "Llama 4 Community License", "c", "حد 700 مليون MAU", ""],
+["Llama 3.3 70B", "Meta", "Llama Community License", "c", "حد 700 مليون MAU", "70B"],
+["Llama 3.1 405B", "Meta", "Llama Community License", "c", "حد 700 مليون MAU", "405B"],
+["Llama 3.1 8B", "Meta", "Llama Community License", "c", "حد 700 مليون MAU", "8B"],
+["Llama 3.2 3B", "Meta", "Llama Community License", "c", "حد 700 مليون MAU", "3B"],
+["Llama 3.2 Vision 11B", "Meta", "Llama Community License", "c", "متخصص: الرؤية", "11B"],
+["Code Llama 70B", "Meta", "Llama 2 Community License", "c", "متخصص: البرمجة", "70B"],
+["Gemma 3 27B", "Google", "Gemma Terms of Use", "c", "تجاري مع سياسة استخدام", "27B"],
+["Gemma 3 12B", "Google", "Gemma Terms of Use", "c", "تجاري مع سياسة استخدام", "12B"],
+["Gemma 3 4B", "Google", "Gemma Terms of Use", "c", "تجاري مع سياسة استخدام", "4B"],
+["Gemma 3 1B", "Google", "Gemma Terms of Use", "c", "تجاري مع سياسة استخدام", "1B"],
+["CodeGemma", "Google", "Gemma Terms of Use", "c", "متخصص: البرمجة", ""],
+["Phi-4", "Microsoft", "MIT", "p", "", "14B"],
+["Phi-4-reasoning", "Microsoft", "MIT", "p", "متخصص: الاستدلال", "14B"],
+["Phi-4-mini", "Microsoft", "MIT", "p", "", ""],
+["Phi-3.5-MoE", "Microsoft", "MIT", "p", "نموذج مرن (MoE)", ""],
+["Phi-3-medium", "Microsoft", "MIT", "p", "", "14B"],
+["Nemotron Nano 9B v2", "NVIDIA", "NVIDIA Open Model License", "c", "تجاري مع شروط NVIDIA", "9B"],
+["Llama-3.3-Nemotron-Super-49B", "NVIDIA", "NVIDIA + Llama License", "c", "مبني على Llama", "49B"],
+["Nemotron-4 340B", "NVIDIA", "NVIDIA Open Model License", "c", "تجاري مع شروط NVIDIA", "340B"],
+["Hermes 4 405B", "Nous Research", "Llama Community License", "c", "مبني على Llama 3.1", "405B"],
+["Hermes 4 70B", "Nous Research", "Llama Community License", "c", "مبني على Llama 3.1", "70B"],
+["Hermes 4 14B", "Nous Research", "Apache 2.0", "p", "مبني على Qwen", "14B"],
+["Nous Hermes 2 Mixtral", "Nous Research", "Apache 2.0", "p", "مبني على Mistral", ""],
+["Granite 4.0 H-Small", "IBM", "Apache 2.0", "p", "", "12B"],
+["Granite 4.0 H-Tiny", "IBM", "Apache 2.0", "p", "", "1B"],
+["Granite Code", "IBM", "Apache 2.0", "p", "متخصص: البرمجة", ""],
+["Seed-OSS-36B", "ByteDance", "Apache 2.0", "p", "", "36B"],
+["OLMo 3 32B", "AllenAI", "Apache 2.0", "p", "مفتوح بالكامل (بيانات+كود)", "32B"],
+["OLMo 3 7B", "AllenAI", "Apache 2.0", "p", "مفتوح بالكامل", "7B"],
+["Tülu 3 405B", "AllenAI", "Llama Community License", "c", "مبني على Llama 3.1", "405B"],
+["Molmo", "AllenAI", "Apache 2.0", "p", "متخصص: الرؤية", ""],
+["Falcon-H1", "TII", "Falcon LLM License", "c", "قريب من Apache مع شروط", ""],
+["Falcon 3 10B", "TII", "TII Falcon License 2.0", "c", "تجاري مع سياسة استخدام", "10B"],
+["Falcon 180B", "TII", "Falcon-180B TII License", "c", "قيود على الاستضافة", "180B"],
+["SmolLM3 3B", "Hugging Face", "Apache 2.0", "p", "خفيف الوزن", "3B"],
+["SmolLM2", "Hugging Face", "Apache 2.0", "p", "خفيف الوزن", ""],
+["Zephyr 7B", "Hugging Face", "MIT", "p", "مبني على Mistral", "7B"],
+["LFM2", "Liquid AI", "LFM Open License v1.0", "c", "تجاري مع حد دخل سنوي", ""],
+["Command R+", "Cohere", "CC-BY-NC 4.0", "n", "غير تجاري", ""],
+["Command R", "Cohere", "CC-BY-NC 4.0", "n", "غير تجاري", ""],
+["Yi-1.5 34B", "01.AI", "Apache 2.0", "p", "", "34B"],
+["Yi-Coder", "01.AI", "Apache 2.0", "p", "متخصص: البرمجة", ""],
+["InternLM3 8B", "Shanghai AI Lab", "Apache 2.0", "p", "", "8B"],
+["InternVL3", "Shanghai AI Lab", "MIT / Apache 2.0", "p", "متخصص: الرؤية", ""],
+["Intern-S1", "Shanghai AI Lab", "Apache 2.0", "p", "", ""],
+["Step-3", "StepFun", "Apache 2.0", "p", "", ""],
+["ERNIE 4.5 300B-A47B", "Baidu", "Apache 2.0", "p", "", "300B"],
+["ERNIE 4.5 21B-A3B", "Baidu", "Apache 2.0", "p", "", "21B"],
+["Hunyuan-A13B", "Tencent", "Tencent Hunyuan License", "c", "حد 100 مليون MAU", "13B"],
+["MiMo-7B", "Xiaomi", "MIT", "p", "", "7B"],
+["LongCat-Flash", "Meituan", "MIT", "p", "", ""],
+["Reka Flash 3", "Reka AI", "Apache 2.0", "p", "", ""],
+["Jamba 1.7", "AI21 Labs", "Jamba Open Model License", "c", "تجاري تحت حد دخل سنوي", ""],
+["Jais", "Inception / G42", "Apache 2.0", "p", "متخصص: اللغة العربية", ""],
+["ALLaM", "SDAIA", "Apache 2.0", "p", "متخصص: اللغة العربية", ""],
+["Fanar", "QCRI", "Apache 2.0", "p", "متخصص: اللغة العربية", ""],
+["SILMA 9B", "SILMA AI", "Gemma Terms of Use", "c", "مبني على Gemma 2", "9B"],
+["StarCoder2 15B", "BigCode", "BigCode OpenRAIL-M", "c", "متخصص: البرمجة", "15B"],
+["DBRX", "Databricks", "Databricks Open Model License", "c", "تجاري مع قيود استخدام", ""],
+["Solar 10.7B", "Upstage", "Apache 2.0", "p", "", "10.7B"],
+["Snowflake Arctic", "Snowflake", "Apache 2.0", "p", "نموذج مرن (MoE)", ""]
+];
+
+const LABEL={p:"تجاري بدون قيود",c:"تجاري بشروط",n:"غير تجاري"};
+const ICON={p:"✅",c:"⚠️",n:"❌"};
+const FILTERS=[
+["all","الكل 🌍"],
+["p","بدون قيود ✅"],
+["c","بشروط ⚠️"],
+["n","غير تجاري ❌"],
+["pc","قابل للتجاري 📝"]
+];
+
+let f="all",q="";
+const chips=document.getElementById("chips"),list=document.getElementById("list"),count=document.getElementById("count");
+
+FILTERS.forEach(([k,t])=>{
+  const b=document.createElement("button");
+  b.className="chip";
+  b.textContent=t;
+  b.dataset.k=k;
+  b.onclick=()=>{f=k;render()};
+  chips.appendChild(b)
+});
+
+document.getElementById("q").addEventListener("input",e=>{
+  q=e.target.value.trim().toLowerCase();
+  render()
+});
+
+document.getElementById("theme-toggle").addEventListener("click",()=>{
+  const html=document.documentElement;
+  const isDark=html.getAttribute("data-theme")==="dark";
+  html.setAttribute("data-theme", isDark?"light":"dark");
+  localStorage.setItem("theme", isDark?"light":"dark");
+  updateThemeButton();
+});
+
+function updateThemeButton(){
+  const btn=document.getElementById("theme-toggle");
+  const isDark=document.documentElement.getAttribute("data-theme")==="dark";
+  btn.textContent=isDark?"☀️":"🌙";
+}
+
+const savedTheme=localStorage.getItem("theme");
+if(savedTheme){document.documentElement.setAttribute("data-theme",savedTheme)}
+updateThemeButton();
+
+function esc(s){
+  return s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))
+}
+
+function render(){
+  chips.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===f));
+  
+  const rows=DATA.filter(r=>
+    (f==="all" || f==="pc"?(f==="all"?true:["p","c"].includes(r[3])):f.includes(r[3]))&&
+    (!q||(r[0]+" "+r[1]+" "+r[2]+" "+r[4]).toLowerCase().includes(q))
+  );
+  
+  count.textContent=`${rows.length} من ${DATA.length} نموذج`;
+  
+  if(!rows.length){
+    list.innerHTML='<div class="empty">مفيش نتائج. جرّب كلمة تانية أو شيل الفلتر.</div>';
+    document.getElementById("stats").innerHTML="";
+    return;
+  }
+  
+  const stats={p:0,c:0,n:0};
+  rows.forEach(r=>stats[r[3]]++);
+  
+  const order=[["p","تجاري بدون قيود ✅"],["c","تجاري بشروط ⚠️"],["n","غير تجاري ❌"]];
+  
+  list.innerHTML=order.map(([k,title])=>{
+    const g=rows.filter(r=>r[3]===k);
+    if(!g.length) return "";
+    return '<div class="group"><span class="group-icon">'+ICON[k]+'</span>'+title+' ('+g.length+')</div><ul>'+
+    g.map(r=>
+      '<li class="'+k+'">'+
+      '<div class="top">'+
+      '<span class="name">'+esc(r[0])+'</span>'+
+      '<span class="dev">'+esc(r[1])+'</span>'+
+      '</div>'+
+      '<div class="lic">'+
+      '<span class="tag">'+LABEL[k]+'</span>'+
+      '<span class="license-text">'+esc(r[2])+'</span>'+
+      '</div>'+
+      (r[5]?'<div class="specs"><span class="spec">📏 الحجم: '+esc(r[5])+'</span></div>':'')+
+      (r[4]?'<div class="note">📌 '+esc(r[4])+'</div>':'')+'</li>').join("")+'</ul>'
+  }).join("");
+  
+  document.getElementById("stats").innerHTML=`
+    <div class="stat-card p"><strong>${stats.p}</strong><small>بدون قيود</small></div>
+    <div class="stat-card c"><strong>${stats.c}</strong><small>بشروط</small></div>
+    <div class="stat-card n"><strong>${stats.n}</strong><small>غير تجاري</small></div>
+  `;
+}
+
+render();
+</script>
+
+</body>
+</html>
