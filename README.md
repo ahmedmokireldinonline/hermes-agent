@@ -114,6 +114,7 @@ tests/         automated and regression tests
 workspace/     confined file workspace
 docs-open-models.md  model fleet and agent handoff
 docs-architecture.md architecture diagrams
+docs/index.html      responsive project landing page with inline icons
 ```
 
 ## 🧰 External Skills من GitHub والمنصات الأخرى
