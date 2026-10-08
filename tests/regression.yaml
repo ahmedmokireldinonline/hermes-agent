@@ -1,0 +1,14 @@
+dev:
+  - id: occupancy-001
+    role: reasoner
+    input: "Compute the occupancy rate for 18 booked nights out of 30."
+    expected_contains: ["60"]
+  - id: arabic-followup-001
+    role: arabic
+    input: "Write a polite Arabic follow-up to a client who has not replied in 3 days."
+    rubric: [accuracy, completeness, language_quality, instruction_following]
+holdout:
+  - id: quote-001
+    role: arabic
+    input: "Draft a short message confirming a price quote."
+    rubric: [accuracy, completeness, language_quality, instruction_following]

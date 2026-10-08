@@ -1,0 +1,132 @@
+project_owner: "Ahmed MO Kireldin"
+project_url: "https://Ahmedmokireldin.online"
+
+# Open-source/open-weight lineup for self-hosted multi-agent use.
+# License status is documented conservatively; verify each model card before redistribution.
+profiles:
+  lite:
+    fast: qwen3:4b
+    planner: qwen3:8b
+    coder: qwen2.5-coder:7b
+    arabic: qwen3:8b
+    critic: granite3.3:8b
+    vision: mistral-small3.1:24b
+    embed: bge-m3
+  balanced:
+    fast: qwen3:4b
+    planner: qwen3:14b
+    reasoner: deepseek-r1:14b
+    coder: qwen2.5-coder:14b
+    arabic: qwen3:14b
+    critic: mistral-small3.1:24b
+    vision: mistral-small3.1:24b
+    embed: bge-m3
+  quality:
+    fast: qwen3:8b
+    planner: qwen3:32b
+    reasoner: deepseek-r1:32b
+    coder: qwen2.5-coder:32b
+    arabic: qwen3:32b
+    critic: mistral-small3.1:24b
+    vision: mistral-small3.1:24b
+    embed: bge-m3
+
+models:
+  qwen3:4b:
+    family: Qwen3
+    role_defaults: [router, arabic]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [multilingual, Arabic, reasoning-toggle, tool-calling, low-latency]
+    source: https://qwenlm.github.io/blog/qwen3/
+  qwen3:8b:
+    family: Qwen3
+    role_defaults: [planner, arabic]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [multilingual, Arabic, reasoning-toggle, tool-calling]
+    source: https://qwenlm.github.io/blog/qwen3/
+  qwen3:14b:
+    family: Qwen3
+    role_defaults: [planner, arabic]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [multilingual, Arabic, long-context, reasoning, tool-calling]
+    source: https://qwenlm.github.io/blog/qwen3/
+  qwen3:32b:
+    family: Qwen3
+    role_defaults: [planner, arabic]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [multilingual, Arabic, reasoning, tool-calling]
+    source: https://qwenlm.github.io/blog/qwen3/
+  deepseek-r1:14b:
+    family: DeepSeek-R1 distilled
+    role_defaults: [reasoner]
+    license: MIT for DeepSeek-R1 release; verify the exact distilled checkpoint card
+    status: open-weight
+    strengths: [math, reasoning, code]
+    source: https://api-docs.deepseek.com/news/news250120
+  deepseek-r1:32b:
+    family: DeepSeek-R1 distilled
+    role_defaults: [reasoner]
+    license: MIT for DeepSeek-R1 release; verify the exact distilled checkpoint card
+    status: open-weight
+    strengths: [deep-reasoning, math, code]
+    source: https://api-docs.deepseek.com/news/news250120
+  qwen2.5-coder:7b:
+    family: Qwen2.5-Coder
+    role_defaults: [coder]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [coding, repository tasks, local inference]
+    source: https://github.com/QwenLM/Qwen2.5-Coder
+  qwen2.5-coder:14b:
+    family: Qwen2.5-Coder
+    role_defaults: [coder]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [coding, debugging, tests]
+    source: https://github.com/QwenLM/Qwen2.5-Coder
+  qwen2.5-coder:32b:
+    family: Qwen2.5-Coder
+    role_defaults: [coder]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [advanced coding, long repository tasks]
+    source: https://github.com/QwenLM/Qwen2.5-Coder
+  mistral-small3.1:24b:
+    family: Mistral Small 3.1
+    role_defaults: [critic, vision]
+    license: Apache-2.0
+    status: open-weight
+    strengths: [function-calling, vision, multilingual, long-context]
+    source: https://mistral.ai/news/mistral-small-3-1
+  granite3.3:8b:
+    family: IBM Granite 3.3
+    role_defaults: [critic, tools]
+    license: Apache-2.0; verify exact checkpoint card
+    status: open-weight
+    strengths: [enterprise instruction-following, tool use]
+    source: https://huggingface.co/ibm-granite/granite-3.3-8b-instruct
+  gemma3:12b:
+    family: Gemma 3
+    role_defaults: [vision, planner]
+    license: Gemma Terms of Use, not a generic OSI license
+    status: open-weight
+    strengths: [multimodal, multilingual, local inference]
+    source: https://ai.google.dev/gemma/docs
+  aya-expanse:8b:
+    family: Aya Expanse
+    role_defaults: [arabic]
+    license: CC-BY-NC-4.0 or exact checkpoint terms
+    status: open-weight-noncommercial
+    strengths: [multilingual, Arabic, customer messaging]
+    source: https://huggingface.co/CohereForAI/aya-expanse-8b
+  bge-m3:
+    family: BGE-M3
+    role_defaults: [embed]
+    license: MIT; verify model card
+    status: open-weight
+    strengths: [multilingual-embeddings, Arabic-retrieval]
+    source: https://huggingface.co/BAAI/bge-m3

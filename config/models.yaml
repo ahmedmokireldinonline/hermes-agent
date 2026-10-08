@@ -1,0 +1,26 @@
+executors: [planner, reasoner, coder, arabic, vision, tools]
+roles:
+  fast:
+    model: gemma3:4b
+  planner:
+    model: qwen3:8b
+  reasoner:
+    model: deepseek-r1:8b
+  coder:
+    model: qwen2.5-coder:7b
+  arabic:
+    model: aya-expanse:8b
+  vision:
+    model: qwen2.5-vl:7b
+  tools:
+    model: hermes3:8b
+  critic:
+    model: mistral:7b
+  embed:
+    model: bge-m3
+fallbacks:
+  coder: planner
+  reasoner: planner
+  arabic: planner
+  vision: planner
+  tools: planner

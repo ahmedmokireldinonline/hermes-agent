@@ -1,0 +1,42 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: hermes
+      POSTGRES_USER: hermes
+      POSTGRES_PASSWORD: hermes
+    ports: ["5432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+  redis:
+    image: redis:7-alpine
+    ports: ["6379:6379"]
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+asyncpg://hermes:hermes@postgres:5432/hermes
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_MODE: redis
+      MOCK_LLM: ${MOCK_LLM:-true}
+      MODEL_PROFILE: ${MODEL_PROFILE:-lite}
+      API_KEYS: ${API_KEYS:-}
+      WEBHOOK_ALLOW: ${WEBHOOK_ALLOW:-}
+      SKILL_SOURCE_ALLOW: ${SKILL_SOURCE_ALLOW:-raw.githubusercontent.com,github.com,gitlab.com,huggingface.co}
+      MAX_SKILL_BYTES: ${MAX_SKILL_BYTES:-200000}
+    ports: ["8000:8000"]
+    depends_on: [postgres, redis]
+  worker:
+    build: .
+    command: ["python", "-m", "app.worker"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://hermes:hermes@postgres:5432/hermes
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_MODE: redis
+      MOCK_LLM: ${MOCK_LLM:-true}
+      MODEL_PROFILE: ${MODEL_PROFILE:-lite}
+      SKILL_SOURCE_ALLOW: ${SKILL_SOURCE_ALLOW:-raw.githubusercontent.com,github.com,gitlab.com,huggingface.co}
+      MAX_SKILL_BYTES: ${MAX_SKILL_BYTES:-200000}
+    depends_on: [postgres, redis]
+    deploy:
+      replicas: 1
+volumes:
+  pgdata:
