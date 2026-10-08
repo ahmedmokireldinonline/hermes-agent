@@ -81,10 +81,10 @@ The `config/models.open.yaml` file defines the initial profiles:
 Pull the selected models through Ollama:
 
 ```bash
-PROFILE=lite ./scripts-pull-models.sh
+PROFILE=lite ./scripts/pull-models.sh
 ```
 
-Review licenses before commercial use or redistribution. Open weights do not automatically mean OSI-approved open source. See [docs-open-models.md](docs-open-models.md), [OWNER.md](OWNER.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+Review licenses before commercial use or redistribution. Open weights do not automatically mean OSI-approved open source. See [docs/open-models.md](docs/open-models.md), [OWNER.md](OWNER.md), and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
 ### Recommended internal chain
 
@@ -93,7 +93,7 @@ Review licenses before commercial use or redistribution. Open weights do not aut
 ## Ollama
 
 1. Run Ollama outside Compose or add an Ollama service to your environment.
-2. Pull a profile with `scripts-pull-models.sh`.
+2. Pull a profile with `scripts/pull-models.sh`.
 3. Set `MOCK_LLM=false` and `OLLAMA_URL`.
 4. Review `config/models.open.yaml` before starting production workloads.
 
@@ -115,9 +115,9 @@ prompts/       role guidance
 tests/         automated and regression tests
 workspace/     confined file workspace
 skills/        imported candidate skills
-docs-open-models.md  model fleet and agent handoff
-docs-skills.md       external skills and approval flow
-docs-architecture.md architecture diagrams
+docs/open-models.md  model fleet and agent handoff
+docs/skills.md       external skills and approval flow
+docs/architecture.md architecture diagrams
 docs/index.html      responsive project landing page with inline icons
 ```
 
@@ -131,7 +131,7 @@ python scripts/import_skill.py \
   --name booking-followup
 ```
 
-The skill is saved under `skills/candidates/` after HTTPS validation, host allowlisting, and content hashing. It is not approved and does not receive tool permissions automatically. Read [docs-skills.md](docs-skills.md).
+The skill is saved under `skills/candidates/` after HTTPS validation, host allowlisting, and content hashing. It is not approved and does not receive tool permissions automatically. Read [docs/skills.md](docs/skills.md).
 
 ## MVP scope and planned work
 
@@ -146,3 +146,21 @@ The current version provides the core path but does not yet include real pgvecto
 - Treat all HTTP content as untrusted data.
 - Use a stronger sandbox than a subprocess for untrusted code.
 - Review the exact license of every model before commercial use.
+
+## Web interface
+
+The `web/` directory contains the English landing page, operations dashboard, Models Management, and Tasks Management pages. When the API runs, FastAPI serves the interface from the same origin:
+
+- `/` — professional landing page
+- `/dashboard.html` — operations dashboard
+- `/pages/models.html` — Models Management
+- `/pages/tasks.html` — Tasks Management
+
+The pages are intentionally dependency-free static HTML/CSS/JavaScript and can later be connected to the protected API endpoints.
+
+## Arabic documentation
+
+- [Security guide](docs/SECURITY_AR.md)
+- [Architecture guide](docs/ARCHITECTURE_AR.md)
+- [API reference](docs/API_REFERENCE_AR.md)
+- [Security and DevOps audit](docs/AUDIT.md)
