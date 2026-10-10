@@ -95,6 +95,6 @@ The Python executor is resource-limited but is **not a strong sandbox**. For hos
 
 ## Owner decisions required
 
-1. **License:** choose one of MIT, Apache-2.0, AGPL-3.0, or a proprietary notice. No `LICENSE` file was added pending the owner's decision.
+1. **License:** resolved by the owner as **Proprietary — All Rights Reserved**. See `LICENSE`.
 2. **Personal contact details:** the current project history explicitly requested the phone numbers and email, so they remain present. Confirm whether they should stay in the public README and HTML landing page.
 3. **Docker-per-task sandbox:** decide whether to enable it by default for untrusted Python execution.

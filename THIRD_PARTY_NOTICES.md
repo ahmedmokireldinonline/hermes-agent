@@ -5,6 +5,13 @@
 Project owner: **Ahmed MO Kireldin**  
 Website: https://Ahmedmokireldin.online
 
+## Hermes Agent license
+
+The Hermes Agent source code, project documentation, configuration, and
+original interface materials are **Proprietary — All Rights Reserved**.
+See [LICENSE](LICENSE). Written permission is required for use, copying,
+modification, distribution, deployment, hosting, or commercial exploitation.
+
 ## Model and library notices
 
 This repository references or can integrate with third-party models and libraries. Their names and weights are not transferred by this project. Review each exact checkpoint license before use:

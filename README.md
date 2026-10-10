@@ -3,6 +3,8 @@
 **Project owner:** Ahmed MO Kireldin  
 **Website:** [Ahmedmokireldin.online](https://Ahmedmokireldin.online)
 
+**License:** Proprietary — All Rights Reserved. See [LICENSE](LICENSE). Use, distribution, deployment, modification, or commercial exploitation requires prior written permission from Ahmed MO Kireldin.
+
 ## 📞 Official contact
 
 - Phone: `+201012025650`

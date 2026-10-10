@@ -2,6 +2,8 @@
 
 ## Unreleased — hardening/audit-1
 
+- Added the owner-approved proprietary license: All Rights Reserved.
+
 - Added authenticated task ownership, constant-time API key comparison, request-size limits, rate limiting, and a readiness endpoint.
 - Added safer workspace path checks, file/count limits, Python process limits, SSRF checks, redirect blocking, and worker-side webhook enforcement.
 - Added candidate skill hashing, HTTPS/host controls, pinned-source checks, explicit approval CLI, and audit logging.
