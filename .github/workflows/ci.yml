@@ -1,0 +1,15 @@
+name: CI
+on: [push, pull_request]
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: {python-version: '3.12'}
+      - run: pip install --no-cache-dir -r requirements-dev.txt
+      - run: ruff check app tests scripts
+      - run: pytest -q --cov=app --cov-report=term-missing
+      - run: pip-audit -r requirements.txt
+      - run: cp .env.example .env && sed -i 's/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=ci-password/' .env && sed -i 's/^REDIS_PASSWORD=.*/REDIS_PASSWORD=ci-redis-password/' .env && docker compose config -q
+      - run: docker build --tag hermes-agent:ci .

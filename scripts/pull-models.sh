@@ -2,7 +2,7 @@
 set -euo pipefail
 
 # Pull only models selected for the requested profile.
-# Usage: PROFILE=lite ./scripts-pull-models.sh
+# Usage: PROFILE=lite ./scripts/pull-models.sh
 PROFILE="${PROFILE:-lite}"
 OLLAMA_BIN="${OLLAMA_BIN:-ollama}"
 

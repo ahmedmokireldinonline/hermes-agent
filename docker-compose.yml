@@ -4,39 +4,73 @@ services:
     environment:
       POSTGRES_DB: hermes
       POSTGRES_USER: hermes
-      POSTGRES_PASSWORD: hermes
-    ports: ["5432:5432"]
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
     volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U hermes -d hermes"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    restart: unless-stopped
   redis:
     image: redis:7-alpine
-    ports: ["6379:6379"]
+    command: ["redis-server", "--requirepass", "${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}"]
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli -a \"$$REDIS_PASSWORD\" ping | grep PONG"]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+    environment:
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?Set REDIS_PASSWORD in .env}
+    restart: unless-stopped
   api:
     build: .
+    env_file: [.env]
     environment:
-      DATABASE_URL: postgresql+asyncpg://hermes:hermes@postgres:5432/hermes
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+asyncpg://hermes:${POSTGRES_PASSWORD}@postgres:5432/hermes
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       QUEUE_MODE: redis
-      MOCK_LLM: ${MOCK_LLM:-true}
-      MODEL_PROFILE: ${MODEL_PROFILE:-lite}
-      API_KEYS: ${API_KEYS:-}
-      WEBHOOK_ALLOW: ${WEBHOOK_ALLOW:-}
-      SKILL_SOURCE_ALLOW: ${SKILL_SOURCE_ALLOW:-raw.githubusercontent.com,github.com,gitlab.com,huggingface.co}
-      MAX_SKILL_BYTES: ${MAX_SKILL_BYTES:-200000}
+    extra_hosts: ["host.docker.internal:host-gateway"]
     ports: ["8000:8000"]
-    depends_on: [postgres, redis]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    volumes: ["workspace:/app/workspace"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health', timeout=3)"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
   worker:
     build: .
     command: ["python", "-m", "app.worker"]
+    env_file: [.env]
     environment:
-      DATABASE_URL: postgresql+asyncpg://hermes:hermes@postgres:5432/hermes
-      REDIS_URL: redis://redis:6379/0
+      DATABASE_URL: postgresql+asyncpg://hermes:${POSTGRES_PASSWORD}@postgres:5432/hermes
+      REDIS_URL: redis://:${REDIS_PASSWORD}@redis:6379/0
       QUEUE_MODE: redis
-      MOCK_LLM: ${MOCK_LLM:-true}
-      MODEL_PROFILE: ${MODEL_PROFILE:-lite}
-      SKILL_SOURCE_ALLOW: ${SKILL_SOURCE_ALLOW:-raw.githubusercontent.com,github.com,gitlab.com,huggingface.co}
-      MAX_SKILL_BYTES: ${MAX_SKILL_BYTES:-200000}
-    depends_on: [postgres, redis]
-    deploy:
-      replicas: 1
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+    restart: unless-stopped
+    read_only: true
+    tmpfs: [/tmp]
+    volumes: ["workspace:/app/workspace", "review:/app/review"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    mem_limit: 1g
+    cpus: 1.0
+    pids_limit: 128
 volumes:
   pgdata:
+  workspace:
+  review:

@@ -114,7 +114,7 @@ Model weights and core system code are never modified automatically. Fine-tuning
 
 ```bash
 # Select a profile and pull the models
-PROFILE=lite ./scripts-pull-models.sh
+PROFILE=lite ./scripts/pull-models.sh
 
 # Review the configuration
 cat config/models.open.yaml
