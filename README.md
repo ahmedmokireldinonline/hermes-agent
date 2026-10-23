@@ -146,3 +146,62 @@ The current version provides the core path but does not yet include real pgvecto
 - Treat all HTTP content as untrusted data.
 - Use a stronger sandbox than a subprocess for untrusted code.
 - Review the exact license of every model before commercial use.
+
+## Superpower Automation Layer
+
+Hermes now includes an integrated automation layer instead of treating scraping, browser control, and tracking as separate products:
+
+- **Browser Automation:** Playwright/Chromium sessions with `navigate`, `click`, `fill`, `type`, `press`, `select`, `check`, `hover`, `scroll`, `wait`, `wait_for_selector`, `extract_text`, `extract_attribute`, and `screenshot` actions.
+- **Open-source Scraping:** `POST /scrape` supports HTTP parsing with BeautifulSoup or browser-backed extraction for JavaScript pages. SSRF protection, public-destination checks, domain allowlists, request timeouts, and bounded output are enabled by default.
+- **Workflow Engine:** Save reusable JSON workflows, pass variables such as `{{email}}`, run them through isolated browser contexts, and inspect per-step outputs and artifacts.
+- **Tracking:** Every workflow run and scrape is recorded as an audit event. `GET /metrics` exposes run, action, scrape, success, and failure counters.
+
+### Automation API examples
+
+Create a browser workflow:
+
+```bash
+curl -X POST http://localhost:8000/workflows \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Public page capture","steps":[
+    {"type":"navigate","url":"https://example.com"},
+    {"type":"extract_text","selector":"h1"},
+    {"type":"screenshot"}
+  ]}'
+```
+
+Run it with variables:
+
+```bash
+curl -X POST http://localhost:8000/workflows/<WORKFLOW_ID>/runs \
+  -H 'Content-Type: application/json' \
+  -d '{"variables":{"email":"user@example.com"}}'
+```
+
+Scrape a public page:
+
+```bash
+curl -X POST http://localhost:8000/scrape \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com","selector":"h1","extract":"text"}'
+```
+
+Read tracking data:
+
+```bash
+curl http://localhost:8000/metrics
+curl 'http://localhost:8000/audit-events?limit=50'
+```
+
+For Docker, Chromium is installed automatically. For local development, install the browser once with `playwright install chromium`. Set `BROWSER_ALLOWED_DOMAINS=example.com,another-site.test` to restrict browser and scraper targets; keep `API_KEYS` enabled before exposing the API.
+
+### Delivery roadmap
+
+1. **Foundation:** API authentication, database migrations, structured logs, Redis queue, and worker health.
+2. **Browser MVP:** Playwright sessions, action registry, artifacts, retries, approvals for sensitive actions, and live run state.
+3. **Scraping scale:** Crawlee integration, pagination, deduplication, rate limits, robots policy, JSON/CSV exports, and object storage.
+4. **Workflow power:** conditions, loops, branching, schedules, webhooks, versioning, templates, and n8n connector.
+5. **Observability:** OpenTelemetry traces, Prometheus exporter, Grafana dashboard, alerting, retention jobs, and Sentry-compatible errors.
+6. **Production hardening:** RBAC, encrypted secrets, per-project domain allowlists, SSRF regression suite, stronger sandbox isolation, load tests, and deployment documentation.
+
+The current release is the secure, runnable foundation for this roadmap. It intentionally does not bypass CAPTCHAs, authentication controls, robots policies, or site security; use it only on systems and data you are authorized to automate.
