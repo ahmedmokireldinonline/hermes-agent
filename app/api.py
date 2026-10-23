@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from time import monotonic
 from fastapi import FastAPI, Header, HTTPException, Depends
 from fastapi.staticfiles import StaticFiles
+from fastapi.responses import RedirectResponse
 from sqlalchemy import select, desc
 from sqlalchemy.exc import IntegrityError
 from .config import get_settings, ROOT
@@ -31,6 +32,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title=settings.app_name, version='0.2.0', lifespan=lifespan,
               description='Self-hosted agentic automation: tasks, browser workflows, scraping, and observability.')
 app.mount('/dashboard', StaticFiles(directory=ROOT / 'dashboard', html=True), name='dashboard')
+
+
+@app.get('/', include_in_schema=False)
+async def root():
+    return RedirectResponse(url='/dashboard/', status_code=307)
 
 
 def authenticate(x_api_key: str | None = Header(default=None)):
