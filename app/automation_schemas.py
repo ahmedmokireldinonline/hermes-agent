@@ -34,6 +34,11 @@ class WorkflowRunCreate(BaseModel):
     variables: dict[str, Any] = Field(default_factory=dict)
 
 
+class PaginationParams(BaseModel):
+    limit: int = Field(default=50, ge=1, le=500)
+    offset: int = Field(default=0, ge=0)
+
+
 class WorkflowRunResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: str

@@ -48,7 +48,18 @@ async def scrape(request: dict) -> dict:
         return await browser_run([{'type': 'navigate', 'url': url}, {'type': 'extract_text', 'selector': request.get('selector', 'body')}])
     async with httpx.AsyncClient(timeout=20, follow_redirects=False, headers={'User-Agent': 'HermesAgent/0.2 (+self-hosted)'}) as client:
         response = await client.get(url)
+        redirects = 0
+        while response.is_redirect:
+            redirects += 1
+            if redirects > 5 or not response.headers.get('location'):
+                raise AutomationError('Too many redirects while scraping')
+            next_url = str(httpx.URL(url).join(response.headers['location']))
+            validate_url(next_url)
+            url = next_url
+            response = await client.get(url)
         response.raise_for_status()
+        if int(response.headers.get('content-length', '0') or 0) > 2_000_000:
+            raise AutomationError('Response is larger than the 2 MB scraping limit')
     soup = BeautifulSoup(response.text, 'html.parser')
     nodes = soup.select(request.get('selector', 'body'))
     if request.get('extract') == 'html':
@@ -61,6 +72,10 @@ async def scrape(request: dict) -> dict:
 
 
 async def browser_run(steps: list[dict], variables: dict | None = None) -> dict:
+    if not steps:
+        raise AutomationError('Workflow must contain at least one step')
+    if len(steps) > settings.max_steps:
+        raise AutomationError(f'Workflow exceeds the maximum of {settings.max_steps} steps')
     try:
         from playwright.async_api import async_playwright
     except ImportError as exc:
@@ -75,6 +90,14 @@ async def browser_run(steps: list[dict], variables: dict | None = None) -> dict:
         context = await browser.new_context(accept_downloads=True)
         page = await context.new_page()
         try:
+            async def guard_request(route):
+                request_url = route.request.url
+                scheme = urlparse(request_url).scheme.lower()
+                if scheme in {'http', 'https'}:
+                    validate_url(request_url)
+                await route.continue_()
+
+            await page.route('**/*', guard_request)
             if len(context.pages) > settings.browser_max_pages:
                 raise AutomationError('Browser page limit exceeded')
             for index, raw in enumerate(steps):

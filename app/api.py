@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from time import monotonic
-from fastapi import FastAPI, Header, HTTPException, Depends
+from fastapi import FastAPI, Header, HTTPException, Depends, Query
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from sqlalchemy import select, desc
@@ -113,9 +113,10 @@ async def create_workflow(payload: WorkflowCreate):
 
 
 @app.get('/workflows', response_model=list[WorkflowResponse], dependencies=[Depends(authenticate)])
-async def list_workflows():
+async def list_workflows(limit: int = Query(default=50, ge=1, le=500), offset: int = Query(default=0, ge=0)):
     async with SessionLocal() as session:
-        return list((await session.execute(select(Workflow).order_by(desc(Workflow.created_at)))).scalars())
+        query = select(Workflow).order_by(desc(Workflow.created_at)).offset(offset).limit(limit)
+        return list((await session.execute(query)).scalars())
 
 
 @app.get('/workflows/{workflow_id}', response_model=WorkflowResponse, dependencies=[Depends(authenticate)])
@@ -156,9 +157,11 @@ async def run_workflow_endpoint(workflow_id: str, payload: WorkflowRunCreate):
 
 
 @app.get('/workflows/{workflow_id}/runs', response_model=list[WorkflowRunResponse], dependencies=[Depends(authenticate)])
-async def list_workflow_runs(workflow_id: str):
+async def list_workflow_runs(workflow_id: str, limit: int = Query(default=50, ge=1, le=500), offset: int = Query(default=0, ge=0)):
     async with SessionLocal() as session:
-        return list((await session.execute(select(WorkflowRun).where(WorkflowRun.workflow_id == workflow_id).order_by(desc(WorkflowRun.created_at)))).scalars())
+        query = (select(WorkflowRun).where(WorkflowRun.workflow_id == workflow_id)
+                 .order_by(desc(WorkflowRun.created_at)).offset(offset).limit(limit))
+        return list((await session.execute(query)).scalars())
 
 
 @app.post('/scrape', dependencies=[Depends(authenticate)])
@@ -174,10 +177,10 @@ async def scrape_endpoint(payload: ScrapeRequest):
 
 
 @app.get('/audit-events', dependencies=[Depends(authenticate)])
-async def audit_events(limit: int = 100):
-    limit = max(1, min(limit, 500))
+async def audit_events(limit: int = Query(default=100, ge=1, le=500), offset: int = Query(default=0, ge=0)):
     async with SessionLocal() as session:
-        rows = (await session.execute(select(AuditEvent).order_by(desc(AuditEvent.created_at)).limit(limit))).scalars()
+        query = select(AuditEvent).order_by(desc(AuditEvent.created_at)).offset(offset).limit(limit)
+        rows = (await session.execute(query)).scalars()
         return list(rows)
 
 
@@ -202,9 +205,10 @@ async def create_schedule(payload: ScheduleCreate):
 
 
 @app.get('/schedules', response_model=list[ScheduleResponse], dependencies=[Depends(authenticate)])
-async def list_schedules():
+async def list_schedules(limit: int = Query(default=50, ge=1, le=500), offset: int = Query(default=0, ge=0)):
     async with SessionLocal() as session:
-        return list((await session.execute(select(Schedule).order_by(desc(Schedule.created_at)))).scalars())
+        query = select(Schedule).order_by(desc(Schedule.created_at)).offset(offset).limit(limit)
+        return list((await session.execute(query)).scalars())
 
 
 @app.delete('/schedules/{schedule_id}', status_code=204, dependencies=[Depends(authenticate)])

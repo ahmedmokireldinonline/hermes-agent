@@ -206,6 +206,12 @@ For Docker, Chromium is installed automatically. For local development, install 
 
 The current release is the secure, runnable foundation for this roadmap. It intentionally does not bypass CAPTCHAs, authentication controls, robots policies, or site security; use it only on systems and data you are authorized to automate.
 
+### Recent hardening notes
+
+- Browser workflows enforce `MAX_STEPS` before launching Chromium and validate every HTTP(S) request, including redirects and subresources, against the SSRF/domain policy.
+- HTTP scraping validates each redirect, caps redirect depth at five hops, and rejects responses larger than 2 MB.
+- Collection endpoints support bounded `limit` and `offset` query parameters to prevent unbounded reads: `/workflows`, `/workflows/{id}/runs`, `/schedules`, and `/audit-events`.
+
 ## Distributed Scheduler and Crawlee
 
 The roadmap's distributed execution layer is now included as an optional Compose deployment:

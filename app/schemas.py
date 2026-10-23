@@ -17,7 +17,7 @@ class TaskResponse(BaseModel):
     score: float | None = None
     critique: str | None = None
     reusable: bool = False
-    steps: list[Any] = []
+    steps: list[Any] = Field(default_factory=list)
     retries: int = 0
     failure_reason: str | None = None
     created_at: datetime
