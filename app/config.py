@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     browser_allowed_domains: str = ''
     browser_max_pages: int = 4
     browser_artifact_retention_days: int = 7
+    scheduler_poll_seconds: float = 2.0
+    scheduler_lease_seconds: int = 90
 
     @property
     def allowed_api_keys(self) -> set[str]:

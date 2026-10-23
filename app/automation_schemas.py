@@ -62,3 +62,36 @@ class MetricsResponse(BaseModel):
     browser_actions_total: int
     scrape_requests_total: int
     uptime_seconds: float
+
+
+class ScheduleCreate(BaseModel):
+    workflow_id: str
+    interval_seconds: int = Field(ge=10, le=31_536_000)
+    next_run_at: datetime | None = None
+    variables: dict[str, Any] = Field(default_factory=dict)
+
+
+class ScheduleResponse(ScheduleCreate):
+    model_config = ConfigDict(from_attributes=True)
+    id: str
+    last_run_at: datetime | None = None
+    enabled: bool
+    created_at: datetime
+
+
+class CrawlCreate(BaseModel):
+    start_urls: list[str] = Field(min_length=1, max_length=20)
+    selector: str = Field(default='body', max_length=500)
+    max_requests: int = Field(default=100, ge=1, le=1000)
+
+
+class CrawlResponse(BaseModel):
+    id: str
+    start_urls: list[str]
+    selector: str
+    max_requests: int
+    status: str
+    result: dict[str, Any] = Field(default_factory=dict)
+    error: str | None = None
+    created_at: datetime
+    updated_at: datetime

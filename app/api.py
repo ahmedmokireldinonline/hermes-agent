@@ -9,10 +9,13 @@ from .db import init_db, SessionLocal, Task, get_task
 from .schemas import TaskCreate, TaskResponse, HealthResponse
 from .agent import run_agent
 from .queue import enqueue_task
-from .automation import scrape, run_workflow, AutomationError
-from .automation_models import Workflow, WorkflowRun, AuditEvent
+from .automation import scrape, run_workflow, AutomationError, validate_url
+from .automation_models import Workflow, WorkflowRun, AuditEvent, Schedule, CrawlJob
 from .automation_schemas import (WorkflowCreate, WorkflowResponse, WorkflowRunCreate,
-    WorkflowRunResponse, ScrapeRequest, MetricsResponse)
+    WorkflowRunResponse, ScrapeRequest, MetricsResponse, ScheduleCreate, ScheduleResponse,
+    CrawlCreate, CrawlResponse)
+from .crawlee import enqueue_crawl, get_crawl_result
+from .scheduler import register_schedule, unregister_schedule
 from .tracking import audit, increment, metrics
 
 settings = get_settings()
@@ -168,3 +171,72 @@ async def audit_events(limit: int = 100):
     async with SessionLocal() as session:
         rows = (await session.execute(select(AuditEvent).order_by(desc(AuditEvent.created_at)).limit(limit))).scalars()
         return list(rows)
+
+
+@app.post('/schedules', response_model=ScheduleResponse, status_code=201, dependencies=[Depends(authenticate)])
+async def create_schedule(payload: ScheduleCreate):
+    async with SessionLocal() as session:
+        workflow = await session.get(Workflow, payload.workflow_id)
+        if not workflow:
+            raise HTTPException(status_code=404, detail='Workflow not found')
+        next_run = payload.next_run_at or datetime.now(timezone.utc)
+        if next_run.tzinfo is None:
+            next_run = next_run.replace(tzinfo=timezone.utc)
+        else:
+            next_run = next_run.astimezone(timezone.utc)
+        schedule = Schedule(workflow_id=payload.workflow_id, interval_seconds=payload.interval_seconds,
+                            next_run_at=next_run, variables=payload.variables)
+        session.add(schedule)
+        await session.commit()
+        await session.refresh(schedule)
+        await register_schedule(schedule)
+        return schedule
+
+
+@app.get('/schedules', response_model=list[ScheduleResponse], dependencies=[Depends(authenticate)])
+async def list_schedules():
+    async with SessionLocal() as session:
+        return list((await session.execute(select(Schedule).order_by(desc(Schedule.created_at)))).scalars())
+
+
+@app.delete('/schedules/{schedule_id}', status_code=204, dependencies=[Depends(authenticate)])
+async def delete_schedule(schedule_id: str):
+    async with SessionLocal() as session:
+        schedule = await session.get(Schedule, schedule_id)
+        if not schedule:
+            raise HTTPException(status_code=404, detail='Schedule not found')
+        schedule.enabled = False
+        await session.commit()
+    await unregister_schedule(schedule_id)
+
+
+@app.post('/crawl', response_model=CrawlResponse, status_code=202, dependencies=[Depends(authenticate)])
+async def create_crawl(payload: CrawlCreate):
+    try:
+        for url in payload.start_urls:
+            validate_url(url)
+    except AutomationError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    job_id = await enqueue_crawl(payload.start_urls, payload.selector, payload.max_requests)
+    async with SessionLocal() as session:
+        job = CrawlJob(id=job_id, start_urls=payload.start_urls, selector=payload.selector,
+                       max_requests=payload.max_requests)
+        session.add(job)
+        await session.commit()
+        await session.refresh(job)
+        return job
+
+
+@app.get('/crawl/{job_id}', response_model=CrawlResponse, dependencies=[Depends(authenticate)])
+async def get_crawl(job_id: str):
+    async with SessionLocal() as session:
+        job = await session.get(CrawlJob, job_id)
+        if not job:
+            raise HTTPException(status_code=404, detail='Crawl job not found')
+        result = await get_crawl_result(job_id)
+        if result:
+            job.status = result.get('status', job.status)
+            job.result = result
+            job.error = result.get('error')
+            await session.commit()
+        return job

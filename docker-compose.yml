@@ -44,5 +44,24 @@ services:
     depends_on: [postgres, redis]
     deploy:
       replicas: 1
+  scheduler:
+    build: .
+    command: ["python", "-m", "app.scheduler"]
+    environment:
+      DATABASE_URL: postgresql+asyncpg://hermes:hermes@postgres:5432/hermes
+      REDIS_URL: redis://redis:6379/0
+      QUEUE_MODE: redis
+      BROWSER_HEADLESS: ${BROWSER_HEADLESS:-true}
+      BROWSER_ALLOWED_DOMAINS: ${BROWSER_ALLOWED_DOMAINS:-}
+      SCHEDULER_POLL_SECONDS: ${SCHEDULER_POLL_SECONDS:-2}
+      SCHEDULER_LEASE_SECONDS: ${SCHEDULER_LEASE_SECONDS:-90}
+    depends_on: [postgres, redis]
+  crawler:
+    build: ./crawler
+    environment:
+      REDIS_URL: redis://redis:6379/0
+      BROWSER_ALLOWED_DOMAINS: ${BROWSER_ALLOWED_DOMAINS:-}
+      CRAWL_CONCURRENCY: ${CRAWL_CONCURRENCY:-4}
+    depends_on: [redis]
 volumes:
   pgdata:

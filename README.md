@@ -205,3 +205,38 @@ For Docker, Chromium is installed automatically. For local development, install 
 6. **Production hardening:** RBAC, encrypted secrets, per-project domain allowlists, SSRF regression suite, stronger sandbox isolation, load tests, and deployment documentation.
 
 The current release is the secure, runnable foundation for this roadmap. It intentionally does not bypass CAPTCHAs, authentication controls, robots policies, or site security; use it only on systems and data you are authorized to automate.
+
+## Distributed Scheduler and Crawlee
+
+The roadmap's distributed execution layer is now included as an optional Compose deployment:
+
+- **Redis Sorted Set scheduler:** schedules are stored in `hermes:schedules` with the next execution timestamp. Workers claim due schedules using expiring Redis leases, so multiple scheduler replicas do not execute the same schedule concurrently.
+- **Interval schedules:** create a workflow schedule with a minimum interval of 10 seconds. The scheduler catches up safely after downtime and records each run in the existing workflow/audit tables.
+- **Crawlee worker:** the `crawler/` service uses `PlaywrightCrawler`, bounded concurrency, same-domain link discovery, max-request limits, Redis queueing, and 24-hour result retention.
+
+Create an interval schedule:
+
+```bash
+curl -X POST http://localhost:8000/schedules \
+  -H 'Content-Type: application/json' \
+  -d '{"workflow_id":"<WORKFLOW_ID>","interval_seconds":3600,"variables":{"source":"hourly"}}'
+```
+
+Start a Crawlee crawl:
+
+```bash
+curl -X POST http://localhost:8000/crawl \
+  -H 'Content-Type: application/json' \
+  -d '{"start_urls":["https://example.com"],"selector":"main","max_requests":50}'
+# Poll the returned id
+curl http://localhost:8000/crawl/<CRAWL_JOB_ID>
+```
+
+Run the distributed stack:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+For production, scale the scheduler and crawler independently, keep `BROWSER_ALLOWED_DOMAINS` explicit, add PostgreSQL migrations before schema evolution, and place the API behind TLS, authentication, rate limiting, and an approval layer for sensitive workflows.
