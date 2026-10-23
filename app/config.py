@@ -1,4 +1,5 @@
 from functools import lru_cache
+import os
 from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -7,7 +8,7 @@ ROOT = Path(__file__).resolve().parents[1]
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file='.env', extra='ignore')
     app_name: str = 'Hermes Agent'
-    database_url: str = 'sqlite+aiosqlite:///./hermes.db'
+    database_url: str = 'sqlite+aiosqlite:////tmp/hermes.db' if os.getenv('VERCEL') else 'sqlite+aiosqlite:///./hermes.db'
     redis_url: str = 'redis://localhost:6379/0'
     ollama_url: str = 'http://localhost:11434'
     mock_llm: bool = True

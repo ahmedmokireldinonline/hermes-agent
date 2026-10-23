@@ -1,0 +1,2 @@
+# Optional local/Docker browser runtime; not installed by Vercel Serverless.
+playwright==1.49.1

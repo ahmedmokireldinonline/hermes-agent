@@ -262,3 +262,18 @@ http://localhost:8000/dashboard/
 ```
 
 The UI uses the same API and security controls as the backend. Set `API_KEYS` before exposing it outside a trusted local network.
+
+## Vercel deployment
+
+Vercel can serve the Hermes FastAPI entrypoint and Dashboard for a lightweight demo. The repository now includes `vercel.json` and `api/index.py` so Vercel detects the ASGI application explicitly. Playwright is kept in `requirements-automation.txt` for Docker/local browser workers and is not installed in the Vercel Serverless build.
+
+For a demo deployment, configure these Vercel environment variables:
+
+```text
+DATABASE_URL=postgresql+asyncpg://...
+API_KEYS=your-secure-key
+REDIS_URL=redis://...
+QUEUE_MODE=inline
+```
+
+Use a managed PostgreSQL and Redis provider for persistent Workflows, Schedules, and Crawlee queues. Vercel's `/tmp` SQLite fallback is only a smoke-test fallback and is not durable or shared between serverless instances. The long-running `scheduler` and `crawler` services must continue to run through Docker/VM or a worker platform.
