@@ -146,3 +146,119 @@ The current version provides the core path but does not yet include real pgvecto
 - Treat all HTTP content as untrusted data.
 - Use a stronger sandbox than a subprocess for untrusted code.
 - Review the exact license of every model before commercial use.
+
+## Superpower Automation Layer
+
+Hermes now includes an integrated automation layer instead of treating scraping, browser control, and tracking as separate products:
+
+- **Browser Automation:** Playwright/Chromium sessions with `navigate`, `click`, `fill`, `type`, `press`, `select`, `check`, `hover`, `scroll`, `wait`, `wait_for_selector`, `extract_text`, `extract_attribute`, and `screenshot` actions.
+- **Open-source Scraping:** `POST /scrape` supports HTTP parsing with BeautifulSoup or browser-backed extraction for JavaScript pages. SSRF protection, public-destination checks, domain allowlists, request timeouts, and bounded output are enabled by default.
+- **Workflow Engine:** Save reusable JSON workflows, pass variables such as `{{email}}`, run them through isolated browser contexts, and inspect per-step outputs and artifacts.
+- **Tracking:** Every workflow run and scrape is recorded as an audit event. `GET /metrics` exposes run, action, scrape, success, and failure counters.
+
+### Automation API examples
+
+Create a browser workflow:
+
+```bash
+curl -X POST http://localhost:8000/workflows \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Public page capture","steps":[
+    {"type":"navigate","url":"https://example.com"},
+    {"type":"extract_text","selector":"h1"},
+    {"type":"screenshot"}
+  ]}'
+```
+
+Run it with variables:
+
+```bash
+curl -X POST http://localhost:8000/workflows/<WORKFLOW_ID>/runs \
+  -H 'Content-Type: application/json' \
+  -d '{"variables":{"email":"user@example.com"}}'
+```
+
+Scrape a public page:
+
+```bash
+curl -X POST http://localhost:8000/scrape \
+  -H 'Content-Type: application/json' \
+  -d '{"url":"https://example.com","selector":"h1","extract":"text"}'
+```
+
+Read tracking data:
+
+```bash
+curl http://localhost:8000/metrics
+curl 'http://localhost:8000/audit-events?limit=50'
+```
+
+For Docker, Chromium is installed automatically. For local development, install the browser once with `playwright install chromium`. Set `BROWSER_ALLOWED_DOMAINS=example.com,another-site.test` to restrict browser and scraper targets; keep `API_KEYS` enabled before exposing the API.
+
+### Delivery roadmap
+
+1. **Foundation:** API authentication, database migrations, structured logs, Redis queue, and worker health.
+2. **Browser MVP:** Playwright sessions, action registry, artifacts, retries, approvals for sensitive actions, and live run state.
+3. **Scraping scale:** Crawlee integration, pagination, deduplication, rate limits, robots policy, JSON/CSV exports, and object storage.
+4. **Workflow power:** conditions, loops, branching, schedules, webhooks, versioning, templates, and n8n connector.
+5. **Observability:** OpenTelemetry traces, Prometheus exporter, Grafana dashboard, alerting, retention jobs, and Sentry-compatible errors.
+6. **Production hardening:** RBAC, encrypted secrets, per-project domain allowlists, SSRF regression suite, stronger sandbox isolation, load tests, and deployment documentation.
+
+The current release is the secure, runnable foundation for this roadmap. It intentionally does not bypass CAPTCHAs, authentication controls, robots policies, or site security; use it only on systems and data you are authorized to automate.
+
+## Distributed Scheduler and Crawlee
+
+The roadmap's distributed execution layer is now included as an optional Compose deployment:
+
+- **Redis Sorted Set scheduler:** schedules are stored in `hermes:schedules` with the next execution timestamp. Workers claim due schedules using expiring Redis leases, so multiple scheduler replicas do not execute the same schedule concurrently.
+- **Interval schedules:** create a workflow schedule with a minimum interval of 10 seconds. The scheduler catches up safely after downtime and records each run in the existing workflow/audit tables.
+- **Crawlee worker:** the `crawler/` service uses `PlaywrightCrawler`, bounded concurrency, same-domain link discovery, max-request limits, Redis queueing, and 24-hour result retention.
+
+Create an interval schedule:
+
+```bash
+curl -X POST http://localhost:8000/schedules \
+  -H 'Content-Type: application/json' \
+  -d '{"workflow_id":"<WORKFLOW_ID>","interval_seconds":3600,"variables":{"source":"hourly"}}'
+```
+
+Start a Crawlee crawl:
+
+```bash
+curl -X POST http://localhost:8000/crawl \
+  -H 'Content-Type: application/json' \
+  -d '{"start_urls":["https://example.com"],"selector":"main","max_requests":50}'
+# Poll the returned id
+curl http://localhost:8000/crawl/<CRAWL_JOB_ID>
+```
+
+Run the distributed stack:
+
+```bash
+cp .env.example .env
+docker compose up --build
+```
+
+For production, scale the scheduler and crawler independently, keep `BROWSER_ALLOWED_DOMAINS` explicit, add PostgreSQL migrations before schema evolution, and place the API behind TLS, authentication, rate limiting, and an approval layer for sensitive workflows.
+
+## Frontend Dashboard
+
+Hermes now ships a lightweight responsive control center at `GET /dashboard/`. It is served directly by FastAPI, so it requires no separate frontend build or Node runtime for the UI.
+
+The dashboard provides:
+
+- Live metrics for workflow runs, browser actions, scraping requests, and uptime.
+- Workflow creation from JSON action steps and one-click manual execution.
+- Schedule creation with workflow selection, interval, variables, and stop controls.
+- Crawlee job creation with start URLs, CSS selector, max requests, and status refresh.
+- Audit activity stream with automatic refresh every 15 seconds.
+- Optional API-key field persisted locally in the browser.
+- Responsive dark Hermes visual system for desktop and mobile screens.
+
+Open it after starting Hermes:
+
+```text
+http://localhost:8000/dashboard/
+```
+
+The UI uses the same API and security controls as the backend. Set `API_KEYS` before exposing it outside a trusted local network.
