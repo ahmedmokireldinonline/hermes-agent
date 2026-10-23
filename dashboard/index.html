@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0a1020" />
+  <meta name="description" content="Hermes Agent automation dashboard" />
+  <link rel="icon" type="image/svg+xml" href="/docs/assets/hermes-mark.svg" />
+  <link rel="stylesheet" href="/dashboard/styles.css" />
+  <title>Hermes Control Center</title>
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <a class="brand" href="/dashboard/" aria-label="Hermes Dashboard"><span class="mark">H</span><span><b>Hermes</b><small>Control Center</small></span></a>
+      <nav class="nav" aria-label="التنقل">
+        <a class="active" href="#overview">نظرة عامة <span>01</span></a>
+        <a href="#workflows">Workflows <span>02</span></a>
+        <a href="#schedules">Schedules <span>03</span></a>
+        <a href="#crawling">Crawling <span>04</span></a>
+        <a href="#activity">Activity <span>05</span></a>
+      </nav>
+      <div class="side-note"><span class="pulse"></span><div><b>Control plane online</b><small>Redis · Workers · Browser</small></div></div>
+    </aside>
+    <main class="main">
+      <header class="topbar"><div><p class="eyebrow">HERMES / OPERATIONS</p><h1>Automation command center</h1><p class="subhead">أنشئ، راقب، وجدول كل عمليات المتصفح والـ Crawling من مكان واحد.</p></div><div class="top-actions"><label class="key-field"><span>API key</span><input id="api-key" type="password" placeholder="اختياري" autocomplete="off" /></label><button id="refresh" class="button ghost">تحديث <span>↻</span></button></div></header>
+      <section id="overview" class="stats-grid"><article class="stat-card accent"><span class="stat-label">Workflow runs</span><strong id="metric-runs">—</strong><small><i id="metric-success">—</i> نجاحًا · <i id="metric-failed">—</i> فشلًا</small></article><article class="stat-card"><span class="stat-label">Browser actions</span><strong id="metric-actions">—</strong><small>إجراءات منفذة</small></article><article class="stat-card"><span class="stat-label">Scrape requests</span><strong id="metric-scrapes">—</strong><small>طلبات HTTP وBrowser</small></article><article class="stat-card"><span class="stat-label">System uptime</span><strong id="metric-uptime">—</strong><small>زمن التشغيل الحالي</small></article></section>
+      <div id="toast" class="toast" role="status"></div>
+      <section id="workflows" class="panel-section"><div class="section-heading"><div><p class="eyebrow">01 / BUILD</p><h2>Workflows</h2><p>صمّم تدفقات متتابعة لتشغيل المتصفح واستخراج البيانات.</p></div><button class="button primary" data-scroll="#workflow-form">+ Workflow جديد</button></div><div class="workspace-grid"><form id="workflow-form" class="card form-card"><div class="card-title"><span class="icon cyan">✦</span><div><h3>إنشاء Workflow</h3><small>احفظه ثم شغّله يدويًا أو من Scheduler</small></div></div><label>الاسم<input id="workflow-name" required maxlength="120" placeholder="Public page capture" /></label><label>الوصف<input id="workflow-description" maxlength="1000" placeholder="وصف مختصر للعملية" /></label><label>الخطوات <span class="hint">JSON</span><textarea id="workflow-steps" required rows="9">[
+  {"type":"navigate","url":"https://example.com"},
+  {"type":"extract_text","selector":"h1"},
+  {"type":"screenshot"}
+]</textarea></label><button class="button primary" type="submit">حفظ Workflow <span>→</span></button></form><div class="card list-card"><div class="card-title"><span class="icon violet">◎</span><div><h3>Workflows المحفوظة</h3><small id="workflow-count">جار التحميل...</small></div></div><div id="workflow-list" class="resource-list"><div class="empty">لا توجد Workflows بعد.</div></div></div></div></section>
+      <section id="schedules" class="panel-section"><div class="section-heading"><div><p class="eyebrow">02 / ORCHESTRATE</p><h2>Schedules</h2><p>شغّل Workflows بشكل دوري عبر Redis Scheduler الموزع.</p></div></div><div class="workspace-grid"><form id="schedule-form" class="card form-card"><div class="card-title"><span class="icon amber">◷</span><div><h3>جدولة Workflow</h3><small>Minimum interval: 10 seconds</small></div></div><label>Workflow<select id="schedule-workflow" required><option value="">اختر Workflow</option></select></label><label>الفاصل الزمني <span class="hint">seconds</span><input id="schedule-interval" type="number" min="10" value="3600" required /></label><label>Variables <span class="hint">JSON اختياري</span><textarea id="schedule-variables" rows="4">{}</textarea></label><button class="button primary" type="submit">تفعيل الجدولة <span>→</span></button></form><div class="card list-card"><div class="card-title"><span class="icon amber">◷</span><div><h3>الجدولات النشطة</h3><small id="schedule-count">جار التحميل...</small></div></div><div id="schedule-list" class="resource-list"><div class="empty">لا توجد Schedules بعد.</div></div></div></div></section>
+      <section id="crawling" class="panel-section"><div class="section-heading"><div><p class="eyebrow">03 / COLLECT</p><h2>Crawling</h2><p>أرسل مهام Crawlee مع حدود واضحة للصفحات والتوازي.</p></div></div><div class="workspace-grid"><form id="crawl-form" class="card form-card"><div class="card-title"><span class="icon green">⌁</span><div><h3>بدء Crawl</h3><small>PlaywrightCrawler · same-domain discovery</small></div></div><label>Start URLs <span class="hint">رابط في كل سطر</span><textarea id="crawl-urls" rows="4" required placeholder="https://example.com"></textarea></label><label>CSS selector<input id="crawl-selector" value="main" maxlength="500" /></label><label>Max requests<input id="crawl-max" type="number" min="1" max="1000" value="50" /></label><button class="button primary" type="submit">بدء Crawling <span>→</span></button></form><div class="card list-card"><div class="card-title"><span class="icon green">⌁</span><div><h3>مهام Crawling</h3><small id="crawl-count">يتم حفظ النتائج في Redis لمدة 24 ساعة</small></div></div><div id="crawl-list" class="resource-list"><div class="empty">لا توجد مهام Crawling بعد في هذه الجلسة.</div></div></div></div></section>
+      <section id="activity" class="panel-section"><div class="section-heading"><div><p class="eyebrow">04 / TRACE</p><h2>Activity stream</h2><p>آخر الأحداث المسجلة في Audit Log.</p></div></div><div class="card activity-card"><div id="activity-list" class="activity-list"><div class="empty">جار تحميل النشاط...</div></div></div></section>
+      <footer><span>Hermes Agent · Self-hosted automation OS</span><span>Dashboard v1 · <a href="/docs" target="_blank">API Docs</a></span></footer>
+    </main>
+  </div>
+  <script src="/dashboard/app.js"></script>
+</body>
+</html>

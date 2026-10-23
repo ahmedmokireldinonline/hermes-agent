@@ -240,3 +240,25 @@ docker compose up --build
 ```
 
 For production, scale the scheduler and crawler independently, keep `BROWSER_ALLOWED_DOMAINS` explicit, add PostgreSQL migrations before schema evolution, and place the API behind TLS, authentication, rate limiting, and an approval layer for sensitive workflows.
+
+## Frontend Dashboard
+
+Hermes now ships a lightweight responsive control center at `GET /dashboard/`. It is served directly by FastAPI, so it requires no separate frontend build or Node runtime for the UI.
+
+The dashboard provides:
+
+- Live metrics for workflow runs, browser actions, scraping requests, and uptime.
+- Workflow creation from JSON action steps and one-click manual execution.
+- Schedule creation with workflow selection, interval, variables, and stop controls.
+- Crawlee job creation with start URLs, CSS selector, max requests, and status refresh.
+- Audit activity stream with automatic refresh every 15 seconds.
+- Optional API-key field persisted locally in the browser.
+- Responsive dark Hermes visual system for desktop and mobile screens.
+
+Open it after starting Hermes:
+
+```text
+http://localhost:8000/dashboard/
+```
+
+The UI uses the same API and security controls as the backend. Set `API_KEYS` before exposing it outside a trusted local network.

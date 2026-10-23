@@ -2,9 +2,10 @@ from contextlib import asynccontextmanager
 from datetime import datetime, timezone
 from time import monotonic
 from fastapi import FastAPI, Header, HTTPException, Depends
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy import select, desc
 from sqlalchemy.exc import IntegrityError
-from .config import get_settings
+from .config import get_settings, ROOT
 from .db import init_db, SessionLocal, Task, get_task
 from .schemas import TaskCreate, TaskResponse, HealthResponse
 from .agent import run_agent
@@ -29,6 +30,7 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title=settings.app_name, version='0.2.0', lifespan=lifespan,
               description='Self-hosted agentic automation: tasks, browser workflows, scraping, and observability.')
+app.mount('/dashboard', StaticFiles(directory=ROOT / 'dashboard', html=True), name='dashboard')
 
 
 def authenticate(x_api_key: str | None = Header(default=None)):
